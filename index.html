@@ -1,489 +1,1615 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>McGowan Learning Lab</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    /* ======================== */
-    /* RESET & BASE             */
-    /* ======================== */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grammar Quest - Pokemon Grammar Flashcards!</title>
+<link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
 
-    body {
-      font-family: 'Nunito', sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #0f0c29 0%, #1a1a4e 40%, #24243e 100%);
-      color: #e0e0e0;
-      overflow-x: hidden;
-    }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* ======================== */
-    /* STARFIELD BACKGROUND     */
-    /* ======================== */
-    .stars {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .star {
-      position: absolute;
-      background: #fff;
-      border-radius: 50%;
-      animation: twinkle 3s ease-in-out infinite alternate;
-    }
-    @keyframes twinkle {
-      0% { opacity: 0.2; }
-      100% { opacity: 0.9; }
-    }
+  :root {
+    --poke-red: #E3350D;
+    --poke-blue: #2A75BB;
+    --poke-yellow: #FFCB05;
+    --poke-gold: #B3A125;
+    --poke-dark: #2B2B2B;
+    --grass: #78C850;
+    --fire: #F08030;
+    --water: #6890F0;
+    --electric: #F8D030;
+    --psychic: #F85888;
+    --normal: #A8A878;
+    --bug: #A8B820;
+    --fairy: #EE99AC;
+  }
 
-    /* ======================== */
-    /* FLOATING POKEBALLS       */
-    /* ======================== */
-    .floating-balls {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .pokeball-float {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(to bottom, #e03030 50%, #fff 50%);
-      border: 3px solid #333;
-      opacity: 0.12;
-      animation: floatBall 20s linear infinite;
-    }
-    .pokeball-float::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 12px;
-      height: 12px;
-      background: #fff;
-      border-radius: 50%;
-      border: 3px solid #333;
-    }
-    @keyframes floatBall {
-      0%   { transform: translateY(110vh) rotate(0deg); }
-      100% { transform: translateY(-20vh) rotate(720deg); }
-    }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #fff;
+  }
 
-    /* ======================== */
-    /* MAIN CONTAINER           */
-    /* ======================== */
-    .container {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 40px 20px 60px;
-    }
+  /* Floating pokeballs background */
+  .bg-pokeball {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #E3350D 50%, #fff 50%);
+    opacity: 0.06;
+    z-index: 0;
+    animation: float-pokeball 20s infinite linear;
+  }
+  .bg-pokeball::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    border: 4px solid #333;
+  }
+  .bg-pokeball::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #333;
+    transform: translateY(-50%);
+  }
 
-    /* ======================== */
-    /* HEADER                   */
-    /* ======================== */
-    .header {
-      text-align: center;
-      margin-bottom: 50px;
-    }
+  @keyframes float-pokeball {
+    0% { transform: translateY(110vh) rotate(0deg); }
+    100% { transform: translateY(-120px) rotate(720deg); }
+  }
 
-    .logo {
-      width: 100px;
-      height: 100px;
-      margin: 0 auto 20px;
-      position: relative;
-    }
-    .logo .pokeball {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: linear-gradient(to bottom, #e03030 50%, #fff 50%);
-      border: 5px solid #333;
-      position: relative;
-      animation: logoBounce 2s ease-in-out infinite;
-      box-shadow: 0 0 30px rgba(224, 48, 48, 0.3);
-    }
-    .logo .pokeball::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 5px;
-      background: #333;
-      transform: translateY(-50%);
-    }
-    .logo .pokeball::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 24px;
-      height: 24px;
-      background: #fff;
-      border-radius: 50%;
-      border: 5px solid #333;
-      z-index: 2;
-    }
-    @keyframes logoBounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
+  /* Stars */
+  .star {
+    position: fixed;
+    width: 3px;
+    height: 3px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+    z-index: 0;
+  }
+  @keyframes twinkle {
+    0% { opacity: 0.2; }
+    100% { opacity: 1; }
+  }
 
-    .site-title {
-      font-family: 'Fredoka One', cursive;
-      font-size: 2.8rem;
-      color: #FFD700;
-      text-shadow: 3px 3px 0 #b8860b, 0 0 20px rgba(255, 215, 0, 0.3);
-      line-height: 1.1;
-      margin-bottom: 10px;
-    }
-    .site-subtitle {
-      font-size: 1.15rem;
-      color: #aab;
-      font-weight: 600;
-    }
+  /* ========== SCREENS ========== */
+  .screen {
+    display: none;
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
 
-    /* ======================== */
-    /* PROJECTS SECTION         */
-    /* ======================== */
-    .section-title {
-      font-family: 'Fredoka One', cursive;
-      font-size: 1.5rem;
-      color: #FFD700;
-      text-align: center;
-      margin-bottom: 30px;
-      text-shadow: 1px 1px 0 #b8860b;
-    }
+  /* ========== TITLE SCREEN ========== */
+  #title-screen {
+    justify-content: center;
+    gap: 30px;
+    text-align: center;
+  }
 
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 24px;
-    }
+  .title-pokeball {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--poke-red) 50%, #fff 50%);
+    position: relative;
+    animation: bounce-in 1s ease-out, pokeball-pulse 2s infinite alternate 1s;
+    margin: 0 auto;
+    box-shadow: 0 0 40px rgba(227, 53, 13, 0.4);
+  }
+  .title-pokeball::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 5px solid #333;
+    z-index: 2;
+  }
+  .title-pokeball::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: #333;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
 
-    /* ======================== */
-    /* PROJECT CARD             */
-    /* ======================== */
-    .project-card {
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      padding: 30px 24px;
-      text-align: center;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    .project-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(255, 215, 0, 0.4);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.1);
-      background: rgba(255, 255, 255, 0.09);
-    }
-    .project-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,215,0,0.03) 0%, transparent 70%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-    }
-    .project-card:hover::before {
-      opacity: 1;
-    }
+  @keyframes bounce-in {
+    0% { transform: scale(0) rotate(-180deg); }
+    60% { transform: scale(1.2) rotate(10deg); }
+    80% { transform: scale(0.9) rotate(-5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  @keyframes pokeball-pulse {
+    0% { box-shadow: 0 0 40px rgba(227, 53, 13, 0.4); }
+    100% { box-shadow: 0 0 60px rgba(227, 53, 13, 0.7); }
+  }
 
-    .card-icon {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 18px;
-      position: relative;
-    }
+  .game-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.5rem, 7vw, 4rem);
+    background: linear-gradient(180deg, var(--poke-yellow) 0%, var(--poke-gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));
+    line-height: 1.2;
+  }
 
-    /* Mini Poke Ball icon for Grammar Quest card */
-    .card-icon .mini-pokeball {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: linear-gradient(to bottom, #e03030 50%, #fff 50%);
-      border: 4px solid #444;
-      position: relative;
-      box-shadow: 0 4px 15px rgba(224, 48, 48, 0.3);
-    }
-    .card-icon .mini-pokeball::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: #444;
-      transform: translateY(-50%);
-    }
-    .card-icon .mini-pokeball::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
-      background: #fff;
-      border-radius: 50%;
-      border: 4px solid #444;
-      z-index: 2;
-    }
+  .game-subtitle {
+    font-size: 1.2rem;
+    color: #ccc;
+    margin-top: -10px;
+  }
 
-    /* Sprite overlay on Poke Ball */
-    .card-icon img {
-      position: absolute;
-      bottom: -2px;
-      right: -8px;
-      width: 48px;
-      height: 48px;
-      image-rendering: pixelated;
-      z-index: 3;
-      filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5));
-    }
+  .trainer-name-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
 
-    .project-card h3 {
-      font-family: 'Fredoka One', cursive;
-      font-size: 1.4rem;
-      color: #fff;
-      margin-bottom: 8px;
-    }
+  .trainer-name-section label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: var(--poke-yellow);
+  }
 
-    .project-tags {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-    .tag {
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: rgba(255, 215, 0, 0.15);
-      color: #FFD700;
-      border: 1px solid rgba(255, 215, 0, 0.25);
-    }
+  .trainer-input {
+    padding: 12px 24px;
+    border-radius: 30px;
+    border: 3px solid var(--poke-yellow);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 1.1rem;
+    font-family: 'Nunito', sans-serif;
+    text-align: center;
+    width: 260px;
+    outline: none;
+    transition: all 0.3s;
+  }
+  .trainer-input:focus {
+    background: rgba(255,255,255,0.2);
+    box-shadow: 0 0 20px rgba(255, 203, 5, 0.3);
+  }
+  .trainer-input::placeholder { color: rgba(255,255,255,0.4); }
 
-    .project-card p {
-      font-size: 0.95rem;
-      line-height: 1.5;
-      color: #bbc;
-      margin-bottom: 20px;
-    }
+  .btn {
+    font-family: 'Fredoka One', cursive;
+    padding: 14px 40px;
+    border-radius: 50px;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn:hover { transform: translateY(-3px); }
+  .btn:active { transform: translateY(0px); }
 
-    .play-btn {
-      display: inline-block;
-      padding: 12px 32px;
-      font-family: 'Fredoka One', cursive;
-      font-size: 1.1rem;
-      color: #fff;
-      background: linear-gradient(to bottom, #e03030, #c02020);
-      border: none;
-      border-radius: 30px;
-      text-decoration: none;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #901818, 0 6px 20px rgba(224, 48, 48, 0.3);
-      transition: all 0.15s ease;
-      letter-spacing: 0.5px;
-    }
-    .play-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 0 #901818, 0 8px 25px rgba(224, 48, 48, 0.4);
-    }
-    .play-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 #901818, 0 3px 10px rgba(224, 48, 48, 0.3);
-    }
+  .btn-start {
+    background: linear-gradient(180deg, var(--poke-red) 0%, #c62d0a 100%);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(227, 53, 13, 0.5);
+  }
+  .btn-start:hover { box-shadow: 0 8px 30px rgba(227, 53, 13, 0.7); }
 
-    /* ======================== */
-    /* COMING SOON CARD         */
-    /* ======================== */
-    .project-card.coming-soon {
-      opacity: 0.5;
-      border-style: dashed;
-    }
-    .project-card.coming-soon:hover {
-      transform: none;
-      border-color: rgba(255, 255, 255, 0.15);
-      box-shadow: none;
-      background: rgba(255, 255, 255, 0.06);
-    }
-    .coming-soon-icon {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      opacity: 0.5;
-    }
-    .coming-soon-badge {
-      display: inline-block;
-      padding: 8px 20px;
-      font-family: 'Fredoka One', cursive;
-      font-size: 0.9rem;
-      color: #888;
-      background: rgba(255, 255, 255, 0.05);
-      border: 2px dashed rgba(255, 255, 255, 0.15);
-      border-radius: 30px;
-    }
+  .btn-secondary {
+    background: linear-gradient(180deg, var(--poke-blue) 0%, #1f5a8f 100%);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(42, 117, 187, 0.4);
+    font-size: 1rem;
+    padding: 10px 28px;
+  }
 
-    /* ======================== */
-    /* FOOTER                   */
-    /* ======================== */
-    .footer {
-      text-align: center;
-      margin-top: 60px;
-      padding-top: 30px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      color: #667;
-      font-size: 0.85rem;
-    }
-    .footer a {
-      color: #889;
-      text-decoration: none;
-    }
-    .footer a:hover {
-      color: #FFD700;
-    }
+  .btn-small {
+    font-size: 0.9rem;
+    padding: 8px 20px;
+  }
 
-    /* ======================== */
-    /* RESPONSIVE               */
-    /* ======================== */
-    @media (max-width: 600px) {
-      .site-title { font-size: 2rem; }
-      .site-subtitle { font-size: 1rem; }
-      .container { padding: 30px 16px 40px; }
-      .projects-grid { grid-template-columns: 1fr; }
-      .project-card { padding: 24px 20px; }
-    }
-  </style>
+  /* ========== MODE SELECT ========== */
+  #mode-screen { justify-content: center; gap: 20px; text-align: center; }
+
+  .mode-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: var(--poke-yellow);
+  }
+
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 700px;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .mode-card {
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 24px 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  .mode-card:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-5px);
+    border-color: var(--poke-yellow);
+    box-shadow: 0 10px 30px rgba(255, 203, 5, 0.2);
+  }
+  .mode-card .mode-icon { font-size: 2.5rem; margin-bottom: 10px; }
+  .mode-card h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: var(--poke-yellow);
+    margin-bottom: 6px;
+  }
+  .mode-card p { font-size: 0.85rem; color: #aaa; }
+
+  /* ========== GAME SCREEN ========== */
+  #game-screen { padding-top: 10px; gap: 10px; }
+
+  #cardArea, #answerArea {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    padding: 0 10px;
+  }
+
+  .trainer-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .trainer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--poke-red), var(--poke-yellow));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  .score-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.1);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .streak-display {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: var(--poke-yellow);
+    font-weight: 700;
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    max-width: 600px;
+    height: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--poke-red), var(--poke-yellow));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* Flashcard */
+  .card-container {
+    perspective: 1000px;
+    width: 100%;
+    max-width: 550px;
+    height: 360px;
+    cursor: pointer;
+    margin: 10px 0;
+  }
+
+  .card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+  .card-inner.flipped { transform: rotateY(180deg); }
+
+  .card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 24px;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 32px;
+    text-align: center;
+    overflow-y: auto;
+  }
+
+  .card-front {
+    background: linear-gradient(145deg, #2d2d5e, #1a1a40);
+    border: 3px solid;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+
+  .card-back {
+    background: linear-gradient(145deg, #1a3a1a, #0d2d0d);
+    border: 3px solid var(--grass);
+    transform: rotateY(180deg);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+
+  .card-type-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .card-pokemon {
+    margin-bottom: 8px;
+    animation: pokemon-idle 2s infinite alternate ease-in-out;
+    line-height: 1;
+  }
+  .pokemon-sprite {
+    image-rendering: pixelated;
+    display: block;
+    margin: 0 auto;
+  }
+  .pokemon-fallback {
+    display: none;
+    font-size: 4rem;
+  }
+  @keyframes pokemon-idle {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
+  }
+
+  .card-term {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    margin-bottom: 4px;
+  }
+
+  .card-hint {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+    font-style: italic;
+  }
+
+  .card-back .card-definition {
+    font-size: 1.15rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    max-width: 400px;
+  }
+
+  .card-back .card-example {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    color: var(--poke-yellow);
+    max-width: 400px;
+  }
+
+  .card-tap-hint {
+    position: absolute;
+    bottom: 12px;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* Answer buttons for quiz mode */
+  .answer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .answer-btn {
+    padding: 14px;
+    border-radius: 16px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .answer-btn:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: var(--poke-yellow);
+    transform: scale(1.03);
+  }
+  .answer-btn.correct {
+    background: rgba(120, 200, 80, 0.3) !important;
+    border-color: var(--grass) !important;
+    animation: correct-flash 0.5s;
+  }
+  .answer-btn.wrong {
+    background: rgba(227, 53, 13, 0.3) !important;
+    border-color: var(--poke-red) !important;
+    animation: shake 0.4s;
+  }
+
+  @keyframes correct-flash {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  .sentence-display {
+    background: rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 16px 24px;
+    font-size: 1.1rem;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    line-height: 1.6;
+    margin: 5px 0;
+  }
+  .sentence-display .highlight-word {
+    color: var(--poke-yellow);
+    font-weight: 900;
+    text-decoration: underline;
+    text-decoration-color: var(--poke-yellow);
+    text-underline-offset: 4px;
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 5px;
+  }
+  .nav-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.2); border-color: var(--poke-yellow); }
+
+  /* Feedback overlay */
+  .feedback-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feedback-overlay.show { opacity: 1; }
+
+  .feedback-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 3rem;
+    animation: feedback-pop 0.8s ease-out forwards;
+  }
+  .feedback-text.correct-text {
+    color: var(--grass);
+    text-shadow: 0 0 30px rgba(120, 200, 80, 0.8);
+  }
+  .feedback-text.wrong-text {
+    color: var(--poke-red);
+    text-shadow: 0 0 30px rgba(227, 53, 13, 0.8);
+  }
+
+  @keyframes feedback-pop {
+    0% { transform: scale(0.3); opacity: 0; }
+    40% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(1); opacity: 0; }
+  }
+
+  /* XP popup */
+  .xp-popup {
+    position: fixed;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: var(--poke-yellow);
+    text-shadow: 0 0 15px rgba(255, 203, 5, 0.6);
+    pointer-events: none;
+    z-index: 101;
+    animation: xp-float 1.2s ease-out forwards;
+  }
+  @keyframes xp-float {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    30% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-80px) scale(1); opacity: 0; }
+  }
+
+  /* ========== RESULTS SCREEN ========== */
+  #results-screen { justify-content: center; gap: 20px; text-align: center; }
+
+  .results-pokeball {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--poke-red) 50%, #fff 50%);
+    position: relative;
+    animation: pokeball-pulse 2s infinite alternate;
+  }
+  .results-pokeball::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #fff;
+    border: 5px solid #333;
+    z-index: 2;
+  }
+  .results-pokeball::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: #333;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+
+  .results-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: var(--poke-yellow);
+  }
+
+  .results-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 450px;
+    width: 100%;
+  }
+  .stat-box {
+    background: rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .stat-box .stat-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: var(--poke-yellow);
+  }
+  .stat-box .stat-label {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-top: 4px;
+  }
+
+  .results-rank {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .results-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  /* ========== COLLECTION SCREEN ========== */
+  #collection-screen { padding-top: 20px; gap: 16px; }
+
+  .collection-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: var(--poke-yellow);
+  }
+
+  .collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    max-width: 700px;
+    width: 100%;
+  }
+
+  .collection-card {
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: default;
+  }
+  .collection-card.caught {
+    border-color: var(--grass);
+    background: rgba(120, 200, 80, 0.1);
+  }
+  .collection-card.uncaught {
+    opacity: 0.4;
+    filter: grayscale(1);
+  }
+  .collection-card .col-pokemon { font-size: 2rem; }
+  .collection-card .col-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.85rem;
+    color: var(--poke-yellow);
+    margin-top: 4px;
+  }
+  .collection-card .col-mastery {
+    font-size: 0.7rem;
+    color: #aaa;
+    margin-top: 2px;
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    z-index: 200;
+    pointer-events: none;
+    animation: confetti-fall 2s forwards;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Sound toggle */
+  .sound-toggle {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 50;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .sound-toggle:hover { background: rgba(255,255,255,0.2); }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .answer-grid { grid-template-columns: 1fr; }
+    .card-container { height: 380px; }
+    .results-stats { grid-template-columns: 1fr; }
+    .mode-grid { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 
-  <!-- Starfield -->
-  <div class="stars" id="stars"></div>
+<button class="sound-toggle" id="soundToggle" title="Toggle Sound">🔊</button>
 
-  <!-- Floating Poke Balls -->
-  <div class="floating-balls" id="floatingBalls"></div>
+<!-- Background decorations -->
+<div id="bg-decorations"></div>
 
-  <!-- Main Content -->
-  <div class="container">
+<!-- Feedback overlay -->
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-text" id="feedbackText"></div>
+</div>
 
-    <!-- Header -->
-    <header class="header">
-      <div class="logo">
-        <div class="pokeball"></div>
-      </div>
-      <h1 class="site-title">McGowan Learning Lab</h1>
-      <p class="site-subtitle">Educational games &amp; tools for young trainers</p>
-    </header>
+<!-- ========== TITLE SCREEN ========== -->
+<div class="screen active" id="title-screen">
+  <div class="title-pokeball"></div>
+  <h1 class="game-title">Grammar Quest</h1>
+  <p class="game-subtitle">Catch 'em all — learn every grammar type!</p>
+  <div class="trainer-name-section">
+    <label for="trainerName">What's your Trainer name?</label>
+    <input type="text" id="trainerName" class="trainer-input" placeholder="Ash" maxlength="15" autofocus>
+  </div>
+  <button class="btn btn-start" onclick="goToModes()">I Choose You!</button>
+</div>
 
-    <!-- Projects -->
-    <h2 class="section-title">Choose Your Adventure!</h2>
-
-    <div class="projects-grid">
-
-      <!-- Grammar Quest Card -->
-      <div class="project-card">
-        <div class="card-icon">
-          <div class="mini-pokeball"></div>
-          <img
-            src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
-            alt="Pikachu"
-          >
-        </div>
-        <h3>Grammar Quest</h3>
-        <div class="project-tags">
-          <span class="tag">Grammar</span>
-          <span class="tag">3rd Grade</span>
-          <span class="tag">Pokemon</span>
-        </div>
-        <p>Catch 'em all &mdash; learn every grammar type! A Pokemon-themed flashcard game with quizzes, battles, and a Grammardex to fill.</p>
-        <a href="./grammar-quest/" class="play-btn">Play Now!</a>
-      </div>
-
-      <!-- Coming Soon Placeholder -->
-      <div class="project-card coming-soon">
-        <div class="coming-soon-icon">?</div>
-        <h3>Next Adventure</h3>
-        <div class="project-tags">
-          <span class="tag">Coming Soon</span>
-        </div>
-        <p>More learning games are on the way! Stay tuned for the next adventure.</p>
-        <span class="coming-soon-badge">Coming Soon</span>
-      </div>
-
+<!-- ========== MODE SELECT ========== -->
+<div class="screen" id="mode-screen">
+  <h2 class="mode-title">Choose Your Battle!</h2>
+  <p style="color:#aaa; margin-bottom:5px;">Pick a way to train, <span id="modeTrainerName"></span>!</p>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startGame('study')">
+      <div class="mode-icon">📖</div>
+      <h3>Study Mode</h3>
+      <p>Flip cards to learn each grammar type at your own pace</p>
     </div>
+    <div class="mode-card" onclick="startGame('quiz')">
+      <div class="mode-icon">⚔️</div>
+      <h3>Quiz Battle</h3>
+      <p>Identify the grammar type — earn XP for correct answers!</p>
+    </div>
+    <div class="mode-card" onclick="startGame('match')">
+      <div class="mode-icon">🎯</div>
+      <h3>Sentence Safari</h3>
+      <p>Find the grammar type of highlighted words in real sentences</p>
+    </div>
+  </div>
+  <div style="display: flex; gap: 12px; margin-top: 10px;">
+    <button class="btn btn-secondary btn-small" onclick="showCollection()">📦 My Collection</button>
+    <button class="btn btn-secondary btn-small" onclick="showScreen('title-screen')">⬅ Back</button>
+  </div>
+</div>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <p>Powered by <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a></p>
-    </footer>
-
+<!-- ========== GAME SCREEN ========== -->
+<div class="screen" id="game-screen">
+  <div class="top-bar">
+    <div class="trainer-info">
+      <div class="trainer-avatar" id="trainerAvatar">🧢</div>
+      <span id="gameTrainerName">Trainer</span>
+    </div>
+    <div class="streak-display" id="streakDisplay" style="display:none;">🔥 <span id="streakCount">0</span></div>
+    <div class="score-display">⭐ <span id="scoreDisplay">0</span> XP</div>
+  </div>
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progressBar"></div>
   </div>
 
-  <script>
-    // Generate starfield
-    (function() {
-      const container = document.getElementById('stars');
-      const count = 80;
-      for (let i = 0; i < count; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        const size = Math.random() * 2.5 + 0.5;
-        star.style.width = size + 'px';
-        star.style.height = size + 'px';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.animationDelay = (Math.random() * 3) + 's';
-        star.style.animationDuration = (Math.random() * 2 + 2) + 's';
-        container.appendChild(star);
-      }
-    })();
+  <div id="cardArea">
+    <!-- Card or question rendered here -->
+  </div>
 
-    // Generate floating Poke Balls
-    (function() {
-      const container = document.getElementById('floatingBalls');
-      const count = 6;
-      for (let i = 0; i < count; i++) {
-        const ball = document.createElement('div');
-        ball.className = 'pokeball-float';
-        const size = Math.random() * 20 + 30;
-        ball.style.width = size + 'px';
-        ball.style.height = size + 'px';
-        ball.style.left = Math.random() * 100 + '%';
-        ball.style.animationDelay = (Math.random() * 20) + 's';
-        ball.style.animationDuration = (Math.random() * 15 + 15) + 's';
-        container.appendChild(ball);
-      }
-    })();
-  </script>
+  <div id="answerArea">
+    <!-- Answer buttons rendered here -->
+  </div>
 
+  <div class="nav-buttons" id="navButtons">
+    <button class="nav-btn" onclick="prevCard()" title="Previous">◀</button>
+    <button class="nav-btn" onclick="nextCard()" title="Next">▶</button>
+    <button class="btn btn-secondary btn-small" onclick="endGame()" style="margin-left:12px;">Finish</button>
+  </div>
+</div>
+
+<!-- ========== RESULTS SCREEN ========== -->
+<div class="screen" id="results-screen">
+  <div class="results-pokeball"></div>
+  <h2 class="results-title" id="resultsTitle">Great Job!</h2>
+  <div class="results-stats">
+    <div class="stat-box">
+      <div class="stat-num" id="resultScore">0</div>
+      <div class="stat-label">XP Earned</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="resultCorrect">0</div>
+      <div class="stat-label">Correct</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="resultBest">0</div>
+      <div class="stat-label">Best Streak</div>
+    </div>
+  </div>
+  <div class="results-rank" id="resultsRank"></div>
+  <div class="results-buttons">
+    <button class="btn btn-start" onclick="goToModes()">Play Again!</button>
+    <button class="btn btn-secondary" onclick="showCollection()">📦 Collection</button>
+  </div>
+</div>
+
+<!-- ========== COLLECTION SCREEN ========== -->
+<div class="screen" id="collection-screen">
+  <h2 class="collection-title">Your Grammardex</h2>
+  <p style="color:#aaa;" id="collectionSubtitle"></p>
+  <div class="collection-grid" id="collectionGrid"></div>
+  <button class="btn btn-secondary" onclick="goToModes()" style="margin-top:10px;">⬅ Back</button>
+</div>
+
+<script>
+// ========================
+// DATA
+// ========================
+const SPRITE_BASE = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
+const grammarCards = [
+  {
+    term: "Noun",
+    pokemon: "🐱",
+    sprite: SPRITE_BASE + "52.png",
+    pokemonName: "Meowth",
+    color: "#A8A878",
+    type: "Normal",
+    definition: "A noun is a word for a person, place, thing, or idea. Trainer, Meowth, and courage are all nouns!",
+    quizHint: "This kind of word is the label for a person, place, thing, or idea. Think: trainer, cave, Poke Ball, bravery!",
+    example: "The <b>trainer</b> sent <b>Meowth</b> into the <b>cave</b>.",
+    sentences: [
+      { text: "Meowth polished the shiny {coin} all afternoon.", answer: "Noun" },
+      { text: "The young {trainer} walked toward Cerulean City.", answer: "Noun" },
+      { text: "Pikachu felt a spark of {courage} before the battle.", answer: "Noun" },
+      { text: "Bulbasaur rested under the big tree near the {lake}.", answer: "Noun" },
+    ]
+  },
+  {
+    term: "Verb",
+    pokemon: "⚡",
+    sprite: SPRITE_BASE + "25.png",
+    pokemonName: "Pikachu",
+    color: "#F8D030",
+    type: "Electric",
+    definition: "A verb tells what someone or something does, or what it is. Pikachu battles, jumps, and is electric — those are all verbs!",
+    quizHint: "This kind of word tells what someone does or what is happening. Think: battle, jump, glow, sleep!",
+    example: "Pikachu <b>jumped</b> over the fence and <b>landed</b> safely.",
+    sentences: [
+      { text: "Pikachu {charged} up before the big battle.", answer: "Verb" },
+      { text: "Squirtle {swam} across the river to reach the island.", answer: "Verb" },
+      { text: "The wild Meowth {scratched} the old wooden post.", answer: "Verb" },
+      { text: "Jigglypuff {sang} a lullaby under the stars.", answer: "Verb" },
+    ]
+  },
+  {
+    term: "Adjective",
+    pokemon: "🔥",
+    sprite: SPRITE_BASE + "4.png",
+    pokemonName: "Charmander",
+    color: "#F08030",
+    type: "Fire",
+    definition: "An adjective gives extra detail about a noun — it tells what kind, which one, or how many. A brave Charmander! Brave is the adjective.",
+    quizHint: "This kind of word gives extra detail about a person, place, or thing — it tells what kind, which one, or how many. Think: brave, golden, three!",
+    example: "The <b>brave</b> Charmander crossed the <b>dark</b> forest alone.",
+    sentences: [
+      { text: "Pikachu wore a {tiny} hat to the costume party.", answer: "Adjective" },
+      { text: "A {golden} Poke Ball sat on top of the shelf.", answer: "Adjective" },
+      { text: "Squirtle sprayed {cold} water at the campfire.", answer: "Adjective" },
+      { text: "The {wild} Zubat flew in circles around the cave.", answer: "Adjective" },
+    ]
+  },
+  {
+    term: "Adverb",
+    pokemon: "💨",
+    sprite: SPRITE_BASE + "16.png",
+    pokemonName: "Pidgey",
+    color: "#A890F0",
+    type: "Flying",
+    definition: "An adverb adds meaning to a verb, adjective, or another adverb. It answers how, when, where, or how much. Pidgey soared gracefully — gracefully is the adverb!",
+    quizHint: "This kind of word adds meaning to an action, a description, or another word like itself. It answers how, when, where, or how much. Think: gracefully, always, nearby!",
+    example: "Pidgey <b>gracefully</b> soared <b>high</b> above the treetops.",
+    sentences: [
+      { text: "Charmander {eagerly} ran toward the bowl of berries.", answer: "Adverb" },
+      { text: "Abra {suddenly} teleported out of the tall grass.", answer: "Adverb" },
+      { text: "Bulbasaur slept {peacefully} under the warm sun.", answer: "Adverb" },
+      { text: "Meowth {always} looks for spare coins on the road.", answer: "Adverb" },
+    ]
+  },
+  {
+    term: "Pronoun",
+    pokemon: "🌊",
+    sprite: SPRITE_BASE + "7.png",
+    pokemonName: "Squirtle",
+    color: "#6890F0",
+    type: "Water",
+    definition: "A pronoun is a word used in place of a noun so you do not have to repeat it. Squirtle is strong. He can swim far! He is the pronoun.",
+    quizHint: "This kind of word is used instead of a person's or thing's name so you do not have to say it again and again. Think: he, she, it, they, we!",
+    example: "Squirtle is fast. <b>He</b> beat <b>them</b> in every race!",
+    sentences: [
+      { text: "{She} trained her Squirtle at the beach every morning.", answer: "Pronoun" },
+      { text: "Pikachu was tired, so {it} took a long nap.", answer: "Pronoun" },
+      { text: "{They} went to the Pokemon Center after the battle.", answer: "Pronoun" },
+      { text: "That last Poke Ball is {mine}.", answer: "Pronoun" },
+    ]
+  },
+  {
+    term: "Conjunction",
+    pokemon: "🌿",
+    sprite: SPRITE_BASE + "1.png",
+    pokemonName: "Bulbasaur",
+    color: "#78C850",
+    type: "Grass",
+    definition: "A conjunction is a joining word that links words, ideas, or parts of a sentence. Bulbasaur is small but mighty — but is the conjunction!",
+    quizHint: "This kind of word is a bridge that joins words, ideas, or parts of a sentence together. Think: and, but, or, so, yet!",
+    example: "Bulbasaur was tired <b>but</b> kept training <b>and</b> never quit.",
+    sentences: [
+      { text: "Charmander {and} Pidgey played in the meadow.", answer: "Conjunction" },
+      { text: "Meowth wanted the coin, {but} it rolled away.", answer: "Conjunction" },
+      { text: "Do you want to explore the cave {or} the forest?", answer: "Conjunction" },
+      { text: "Jigglypuff was singing, {so} everyone fell asleep.", answer: "Conjunction" },
+    ]
+  },
+  {
+    term: "Preposition",
+    pokemon: "🦇",
+    sprite: SPRITE_BASE + "41.png",
+    pokemonName: "Zubat",
+    color: "#A040A0",
+    type: "Poison",
+    definition: "A preposition is a word that shows where, when, or how a noun connects to the rest of the sentence. Zubat hung under the rocks — under is the preposition!",
+    quizHint: "This kind of word shows where, when, or how something relates to something else in the sentence. Think: under, over, between, during!",
+    example: "Zubat hid <b>under</b> the rocks <b>near</b> the waterfall.",
+    sentences: [
+      { text: "Pikachu squeezed {between} two large boulders.", answer: "Preposition" },
+      { text: "Meowth napped {under} the wooden bench all day.", answer: "Preposition" },
+      { text: "The battle happened {during} a thunderstorm.", answer: "Preposition" },
+      { text: "Charmander stood {on} the hilltop and looked around.", answer: "Preposition" },
+    ]
+  },
+  {
+    term: "Interjection",
+    pokemon: "🎉",
+    sprite: SPRITE_BASE + "39.png",
+    pokemonName: "Jigglypuff",
+    color: "#EE99AC",
+    type: "Fairy",
+    definition: "An interjection is a word or short phrase that shows a sudden feeling or emotion. It often has an exclamation mark. Yay! Jigglypuff won the contest!",
+    quizHint: "This kind of word bursts out to show a sudden feeling or emotion. It usually stands alone with an exclamation mark. Think: Yay! Oops! Yikes!",
+    example: "<b>Yay!</b> Jigglypuff won the singing contest! <b>Amazing!</b>",
+    sentences: [
+      { text: "{Yikes!} That Zubat surprised me in the dark!", answer: "Interjection" },
+      { text: "{Oops!} Squirtle slipped on the wet rocks.", answer: "Interjection" },
+      { text: "{Hey!} Come look at this rare Pokemon egg!", answer: "Interjection" },
+      { text: "{Awesome!} Bulbasaur just learned a brand new move!", answer: "Interjection" },
+    ]
+  },
+  {
+    term: "Article",
+    pokemon: "🔮",
+    sprite: SPRITE_BASE + "63.png",
+    pokemonName: "Abra",
+    color: "#F85888",
+    type: "Psychic",
+    definition: "An article is one of three tiny words — a, an, or the — that go right before a noun. Abra found an old book in the library.",
+    quizHint: "This kind of word is one of just three tiny words that go right before a naming word to show if it is specific or general. Think: a, an, the!",
+    example: "Abra opened <b>an</b> old book inside <b>the</b> dusty library.",
+    sentences: [
+      { text: "Pikachu chased {a} butterfly across the field.", answer: "Article" },
+      { text: "{The} mysterious cave glowed with blue light.", answer: "Article" },
+      { text: "Jigglypuff found {an} empty stage to sing on.", answer: "Article" },
+      { text: "Meowth hid {the} treasure map under his pillow.", answer: "Article" },
+    ]
+  }
+];
+
+// ========================
+// POKEMON IMAGE HELPERS
+// ========================
+function pokemonImg(card, size = 96) {
+  return `<img
+    src="${card.sprite}"
+    alt="${card.pokemonName}"
+    width="${size}"
+    height="${size}"
+    class="pokemon-sprite"
+    onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+  ><span class="pokemon-fallback" style="display:none;font-size:${size <= 64 ? '2rem' : '4rem'};">${card.pokemon}</span>`;
+}
+
+// Preload all Pokemon sprites
+function preloadSprites() {
+  grammarCards.forEach(card => {
+    if (card.sprite) {
+      const img = new Image();
+      img.src = card.sprite;
+    }
+  });
+}
+preloadSprites();
+
+// ========================
+// STATE
+// ========================
+let trainerName = "Trainer";
+let currentMode = "study";
+let currentCardIndex = 0;
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let correctCount = 0;
+let totalAnswered = 0;
+let soundEnabled = true;
+let shuffledCards = [];
+let sentenceQueue = [];
+let currentSentenceIndex = 0;
+let mastery = {}; // term -> { correct, total }
+
+// Load mastery from localStorage
+try {
+  const saved = localStorage.getItem('grammarquest_mastery');
+  if (saved) mastery = JSON.parse(saved);
+} catch(e) {}
+
+function saveMastery() {
+  localStorage.setItem('grammarquest_mastery', JSON.stringify(mastery));
+}
+
+// ========================
+// AUDIO (Web Audio API beeps)
+// ========================
+let audioCtx;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(freq, duration, type='sine', vol=0.15) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.value = vol;
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+
+function playCorrectSound() {
+  playTone(523, 0.1); // C5
+  setTimeout(() => playTone(659, 0.1), 100); // E5
+  setTimeout(() => playTone(784, 0.15), 200); // G5
+}
+
+function playWrongSound() {
+  playTone(330, 0.15, 'sawtooth', 0.1);
+  setTimeout(() => playTone(277, 0.2, 'sawtooth', 0.1), 150);
+}
+
+function playFlipSound() {
+  playTone(880, 0.05, 'sine', 0.08);
+}
+
+function playVictorySound() {
+  [523, 587, 659, 784, 880].forEach((f, i) => {
+    setTimeout(() => playTone(f, 0.15), i * 120);
+  });
+}
+
+// ========================
+// BACKGROUND DECORATIONS
+// ========================
+function createBackground() {
+  const cont = document.getElementById('bg-decorations');
+  // Stars
+  for (let i = 0; i < 50; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.width = (Math.random() * 3 + 1) + 'px';
+    star.style.height = star.style.width;
+    cont.appendChild(star);
+  }
+  // Floating pokeballs
+  for (let i = 0; i < 5; i++) {
+    const pb = document.createElement('div');
+    pb.className = 'bg-pokeball';
+    pb.style.left = Math.random() * 100 + '%';
+    pb.style.animationDelay = Math.random() * 20 + 's';
+    pb.style.animationDuration = (15 + Math.random() * 15) + 's';
+    pb.style.width = (40 + Math.random() * 40) + 'px';
+    pb.style.height = pb.style.width;
+    cont.appendChild(pb);
+  }
+}
+createBackground();
+
+// ========================
+// SOUND TOGGLE
+// ========================
+document.getElementById('soundToggle').addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+});
+
+// ========================
+// NAVIGATION
+// ========================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goToModes() {
+  trainerName = document.getElementById('trainerName').value.trim() || 'Trainer';
+  document.getElementById('modeTrainerName').textContent = trainerName;
+  showScreen('mode-screen');
+}
+
+// Enter key on name input
+document.getElementById('trainerName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') goToModes();
+});
+
+// ========================
+// GAME START
+// ========================
+function startGame(mode) {
+  currentMode = mode;
+  currentCardIndex = 0;
+  currentSentenceIndex = 0;
+  score = 0;
+  streak = 0;
+  bestStreak = 0;
+  correctCount = 0;
+  totalAnswered = 0;
+
+  shuffledCards = [...grammarCards].sort(() => Math.random() - 0.5);
+
+  // Build sentence queue for "match" mode
+  if (mode === 'match') {
+    sentenceQueue = [];
+    grammarCards.forEach(card => {
+      card.sentences.forEach(s => sentenceQueue.push({ ...s, card }));
+    });
+    sentenceQueue.sort(() => Math.random() - 0.5);
+    sentenceQueue = sentenceQueue.slice(0, 15); // 15 questions
+  }
+
+  document.getElementById('gameTrainerName').textContent = trainerName;
+  document.getElementById('scoreDisplay').textContent = '0';
+  document.getElementById('streakDisplay').style.display = 'none';
+  updateProgress();
+  showScreen('game-screen');
+  renderCurrentView();
+}
+
+function updateProgress() {
+  let total, current;
+  if (currentMode === 'study') {
+    total = shuffledCards.length;
+    current = currentCardIndex + 1;
+  } else if (currentMode === 'quiz') {
+    total = shuffledCards.length;
+    current = currentCardIndex + 1;
+  } else {
+    total = sentenceQueue.length;
+    current = currentSentenceIndex + 1;
+  }
+  const pct = Math.min(100, (current / total) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+// ========================
+// RENDER VIEWS
+// ========================
+function renderCurrentView() {
+  if (currentMode === 'study') renderStudyCard();
+  else if (currentMode === 'quiz') renderQuizCard();
+  else renderSentenceCard();
+}
+
+// ---- STUDY MODE ----
+function renderStudyCard() {
+  const card = shuffledCards[currentCardIndex];
+  const cardArea = document.getElementById('cardArea');
+  const answerArea = document.getElementById('answerArea');
+  const navButtons = document.getElementById('navButtons');
+
+  answerArea.innerHTML = '';
+  navButtons.style.display = 'flex';
+
+  cardArea.innerHTML = `
+    <div class="card-container" onclick="flipCard()">
+      <div class="card-inner" id="cardInner">
+        <div class="card-front" style="border-color:${card.color};">
+          <div class="card-type-badge" style="background:${card.color};">${card.type}</div>
+          <div class="card-pokemon">${pokemonImg(card)}</div>
+          <div class="card-term" style="color:${card.color};">${card.term}</div>
+          <div class="card-hint">${card.pokemonName} Style!</div>
+          <div class="card-tap-hint">tap to flip!</div>
+        </div>
+        <div class="card-back">
+          <div class="card-pokemon">${pokemonImg(card, 64)}</div>
+          <div class="card-definition">${card.definition}</div>
+          <div class="card-example">${card.example}</div>
+          <div class="card-tap-hint">tap to flip back!</div>
+        </div>
+      </div>
+    </div>
+  `;
+  updateProgress();
+}
+
+function flipCard() {
+  const inner = document.getElementById('cardInner');
+  if (inner) {
+    inner.classList.toggle('flipped');
+    playFlipSound();
+  }
+}
+
+function nextCard() {
+  if (currentMode === 'study') {
+    currentCardIndex = (currentCardIndex + 1) % shuffledCards.length;
+    renderStudyCard();
+  }
+}
+
+function prevCard() {
+  if (currentMode === 'study') {
+    currentCardIndex = (currentCardIndex - 1 + shuffledCards.length) % shuffledCards.length;
+    renderStudyCard();
+  }
+}
+
+// ---- QUIZ MODE ----
+function renderQuizCard() {
+  if (currentCardIndex >= shuffledCards.length) { endGame(); return; }
+
+  const card = shuffledCards[currentCardIndex];
+  const cardArea = document.getElementById('cardArea');
+  const answerArea = document.getElementById('answerArea');
+  const navButtons = document.getElementById('navButtons');
+  navButtons.style.display = 'none';
+
+  // Show quiz hint (without naming the answer), no example
+  cardArea.innerHTML = `
+    <div class="card-container" style="cursor:default;">
+      <div class="card-inner">
+        <div class="card-front" style="border-color:${card.color};">
+          <div class="card-pokemon">${pokemonImg(card)}</div>
+          <div class="card-definition" style="font-size:1.05rem; margin-top:10px;">${card.quizHint}</div>
+          <div class="card-hint" style="margin-top:8px;">What grammar type is this?</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Shuffle answers
+  const answers = getQuizAnswers(card.term);
+  answerArea.innerHTML = `
+    <div class="answer-grid">
+      ${answers.map((a, i) => `
+        <button class="answer-btn" onclick="checkQuizAnswer(this, '${a}', '${card.term}')">${a}</button>
+      `).join('')}
+    </div>
+  `;
+  updateProgress();
+}
+
+function getQuizAnswers(correct) {
+  const allTerms = grammarCards.map(c => c.term);
+  const wrong = allTerms.filter(t => t !== correct).sort(() => Math.random() - 0.5).slice(0, 3);
+  const answers = [correct, ...wrong].sort(() => Math.random() - 0.5);
+  return answers;
+}
+
+function checkQuizAnswer(btn, selected, correct) {
+  if (btn.parentElement.dataset.answered) return;
+  btn.parentElement.dataset.answered = 'true';
+  totalAnswered++;
+
+  const buttons = btn.parentElement.querySelectorAll('.answer-btn');
+  buttons.forEach(b => {
+    b.style.pointerEvents = 'none';
+    if (b.textContent === correct) b.classList.add('correct');
+  });
+
+  if (selected === correct) {
+    btn.classList.add('correct');
+    const xp = 10 + streak * 5;
+    score += xp;
+    streak++;
+    correctCount++;
+    if (streak > bestStreak) bestStreak = streak;
+    showFeedback('Super effective!', true);
+    showXPPopup(btn, xp);
+    playCorrectSound();
+    updateMastery(correct, true);
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    showFeedback('Not very effective...', false);
+    playWrongSound();
+    updateMastery(correct, false);
+  }
+
+  updateScoreDisplay();
+
+  setTimeout(() => {
+    currentCardIndex++;
+    renderQuizCard();
+  }, 1200);
+}
+
+// ---- SENTENCE SAFARI MODE ----
+function renderSentenceCard() {
+  if (currentSentenceIndex >= sentenceQueue.length) { endGame(); return; }
+
+  const item = sentenceQueue[currentSentenceIndex];
+  const cardArea = document.getElementById('cardArea');
+  const answerArea = document.getElementById('answerArea');
+  const navButtons = document.getElementById('navButtons');
+  navButtons.style.display = 'none';
+
+  // Parse sentence: {word} becomes highlighted
+  const parts = item.text.split(/\{|\}/);
+  let html = '';
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 1) html += `<span class="highlight-word">${parts[i]}</span>`;
+    else html += parts[i];
+  }
+
+  cardArea.innerHTML = `
+    <div style="margin:10px 0;">
+      <div style="font-family:'Fredoka One',cursive; font-size:1.1rem; color:var(--poke-yellow); margin-bottom:8px;">
+        What part of speech is the highlighted word?
+      </div>
+      <div class="sentence-display">${html}</div>
+    </div>
+  `;
+
+  const answers = getQuizAnswers(item.answer);
+  answerArea.innerHTML = `
+    <div class="answer-grid">
+      ${answers.map(a => `
+        <button class="answer-btn" onclick="checkSentenceAnswer(this, '${a}', '${item.answer}')">${a}</button>
+      `).join('')}
+    </div>
+  `;
+  updateProgress();
+}
+
+function checkSentenceAnswer(btn, selected, correct) {
+  if (btn.parentElement.dataset.answered) return;
+  btn.parentElement.dataset.answered = 'true';
+  totalAnswered++;
+
+  const buttons = btn.parentElement.querySelectorAll('.answer-btn');
+  buttons.forEach(b => {
+    b.style.pointerEvents = 'none';
+    if (b.textContent === correct) b.classList.add('correct');
+  });
+
+  if (selected === correct) {
+    btn.classList.add('correct');
+    const xp = 10 + streak * 5;
+    score += xp;
+    streak++;
+    correctCount++;
+    if (streak > bestStreak) bestStreak = streak;
+    showFeedback('Super effective!', true);
+    showXPPopup(btn, xp);
+    playCorrectSound();
+    updateMastery(correct, true);
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    showFeedback('Not very effective...', false);
+    playWrongSound();
+    updateMastery(correct, false);
+  }
+
+  updateScoreDisplay();
+
+  setTimeout(() => {
+    currentSentenceIndex++;
+    renderSentenceCard();
+  }, 1200);
+}
+
+// ========================
+// MASTERY TRACKING
+// ========================
+function updateMastery(term, correct) {
+  if (!mastery[term]) mastery[term] = { correct: 0, total: 0 };
+  mastery[term].total++;
+  if (correct) mastery[term].correct++;
+  saveMastery();
+}
+
+// ========================
+// UI HELPERS
+// ========================
+function updateScoreDisplay() {
+  document.getElementById('scoreDisplay').textContent = score;
+  if (streak >= 2) {
+    document.getElementById('streakDisplay').style.display = 'flex';
+    document.getElementById('streakCount').textContent = streak;
+  } else {
+    document.getElementById('streakDisplay').style.display = 'none';
+  }
+}
+
+function showFeedback(text, isCorrect) {
+  const overlay = document.getElementById('feedbackOverlay');
+  const textEl = document.getElementById('feedbackText');
+  textEl.textContent = text;
+  textEl.className = 'feedback-text ' + (isCorrect ? 'correct-text' : 'wrong-text');
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 800);
+}
+
+function showXPPopup(btn, xp) {
+  const rect = btn.getBoundingClientRect();
+  const popup = document.createElement('div');
+  popup.className = 'xp-popup';
+  popup.textContent = `+${xp} XP`;
+  popup.style.left = rect.left + rect.width / 2 - 30 + 'px';
+  popup.style.top = rect.top - 10 + 'px';
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 1200);
+}
+
+function spawnConfetti() {
+  const colors = ['#E3350D', '#FFCB05', '#2A75BB', '#78C850', '#F08030', '#EE99AC', '#F85888', '#A040A0'];
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.8 + 's';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = piece.style.width;
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 3000);
+  }
+}
+
+// ========================
+// END GAME / RESULTS
+// ========================
+function endGame() {
+  playVictorySound();
+  spawnConfetti();
+
+  let pct = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
+  let title, rank;
+
+  if (currentMode === 'study') {
+    title = "Study Complete!";
+    rank = "📖 Knowledge is power, " + trainerName + "!";
+    pct = 100;
+  } else if (pct >= 90) {
+    title = "Pokemon Master!";
+    rank = "🏆 " + trainerName + " earned the Grammar Badge!";
+  } else if (pct >= 70) {
+    title = "Great Battle!";
+    rank = "⭐ " + trainerName + " is an Ace Trainer!";
+  } else if (pct >= 50) {
+    title = "Good Try!";
+    rank = "🎒 " + trainerName + " is a rising trainer!";
+  } else {
+    title = "Keep Training!";
+    rank = "💪 " + trainerName + ", train harder and try again!";
+  }
+
+  document.getElementById('resultsTitle').textContent = title;
+  document.getElementById('resultScore').textContent = score;
+  document.getElementById('resultCorrect').textContent =
+    currentMode === 'study' ? shuffledCards.length + ' cards' : correctCount + '/' + totalAnswered;
+  document.getElementById('resultBest').textContent = currentMode === 'study' ? '—' : bestStreak;
+  document.getElementById('resultsRank').textContent = rank;
+
+  showScreen('results-screen');
+}
+
+// ========================
+// COLLECTION
+// ========================
+function showCollection() {
+  const grid = document.getElementById('collectionGrid');
+  grid.innerHTML = '';
+
+  let caught = 0;
+  grammarCards.forEach(card => {
+    const m = mastery[card.term];
+    const isCaught = m && m.correct > 0;
+    if (isCaught) caught++;
+
+    const pct = m ? Math.round((m.correct / m.total) * 100) : 0;
+    const div = document.createElement('div');
+    div.className = 'collection-card ' + (isCaught ? 'caught' : 'uncaught');
+    div.innerHTML = `
+      <div class="col-pokemon">${isCaught ? pokemonImg(card, 48) : '❓'}</div>
+      <div class="col-name">${isCaught ? card.term : '???'}</div>
+      <div class="col-mastery">${isCaught ? card.pokemonName + ' — ' + pct + '% mastery' : 'Not yet caught!'}</div>
+    `;
+    grid.appendChild(div);
+  });
+
+  document.getElementById('collectionSubtitle').textContent =
+    `${caught} of ${grammarCards.length} Grammar Types caught!`;
+
+  showScreen('collection-screen');
+}
+
+// ========================
+// KEYBOARD SUPPORT
+// ========================
+document.addEventListener('keydown', e => {
+  if (document.getElementById('game-screen').classList.contains('active')) {
+    if (currentMode === 'study') {
+      if (e.key === 'ArrowRight') nextCard();
+      else if (e.key === 'ArrowLeft') prevCard();
+      else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+    }
+    if (currentMode === 'quiz' || currentMode === 'match') {
+      if (['1','2','3','4'].includes(e.key)) {
+        const btns = document.querySelectorAll('.answer-btn');
+        const idx = parseInt(e.key) - 1;
+        if (btns[idx] && !btns[idx].parentElement.dataset.answered) btns[idx].click();
+      }
+    }
+  }
+});
+</script>
 </body>
 </html>
