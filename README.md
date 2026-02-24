@@ -2,7 +2,7 @@
 
 Educational games and tools for young learners, hosted on GitHub Pages.
 
-**Live Site:** [https://BoldSecurity.github.io/grammar-quest/](https://BoldSecurity.github.io/grammar-quest/)
+**Live Site:** [https://DirtySecurity.github.io/grammar-quest/](https://BoldSecurity.github.io/grammar-quest/)
 
 ---
 
