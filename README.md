@@ -19,7 +19,7 @@ A Pokemon-themed grammar flashcard game for 3rd graders. Learn all 9 parts of sp
 - Grammardex collection screen
 - Sound effects and animations
 
-**Play:** [Grammar Quest](https://BoldSecurity.github.io/grammar-quest/grammar-quest/)
+**Play:** [Grammar Quest](https://DirtySecurity.github.io/grammar-quest/grammar-quest/)
 
 ---
 
