@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>McGowan Learning Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ======================== */
+    /* RESET & BASE             */
+    /* ======================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29 0%, #1a1a4e 40%, #24243e 100%);
+      color: #e0e0e0;
+      overflow-x: hidden;
+    }
+
+    /* ======================== */
+    /* STARFIELD BACKGROUND     */
+    /* ======================== */
+    .stars {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle 3s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      0% { opacity: 0.2; }
+      100% { opacity: 0.9; }
+    }
+
+    /* ======================== */
+    /* FLOATING POKEBALLS       */
+    /* ======================== */
+    .floating-balls {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .pokeball-float {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom, #e03030 50%, #fff 50%);
+      border: 3px solid #333;
+      opacity: 0.12;
+      animation: floatBall 20s linear infinite;
+    }
+    .pokeball-float::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      border: 3px solid #333;
+    }
+    @keyframes floatBall {
+      0%   { transform: translateY(110vh) rotate(0deg); }
+      100% { transform: translateY(-20vh) rotate(720deg); }
+    }
+
+    /* ======================== */
+    /* MAIN CONTAINER           */
+    /* ======================== */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+
+    /* ======================== */
+    /* HEADER                   */
+    /* ======================== */
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .logo .pokeball {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom, #e03030 50%, #fff 50%);
+      border: 5px solid #333;
+      position: relative;
+      animation: logoBounce 2s ease-in-out infinite;
+      box-shadow: 0 0 30px rgba(224, 48, 48, 0.3);
+    }
+    .logo .pokeball::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: #333;
+      transform: translateY(-50%);
+    }
+    .logo .pokeball::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      background: #fff;
+      border-radius: 50%;
+      border: 5px solid #333;
+      z-index: 2;
+    }
+    @keyframes logoBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .site-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.8rem;
+      color: #FFD700;
+      text-shadow: 3px 3px 0 #b8860b, 0 0 20px rgba(255, 215, 0, 0.3);
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .site-subtitle {
+      font-size: 1.15rem;
+      color: #aab;
+      font-weight: 600;
+    }
+
+    /* ======================== */
+    /* PROJECTS SECTION         */
+    /* ======================== */
+    .section-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      color: #FFD700;
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 1px 1px 0 #b8860b;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    /* ======================== */
+    /* PROJECT CARD             */
+    /* ======================== */
+    .project-card {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      padding: 30px 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .project-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255, 215, 0, 0.4);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.1);
+      background: rgba(255, 255, 255, 0.09);
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,215,0,0.03) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .project-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 18px;
+      position: relative;
+    }
+
+    /* Mini Poke Ball icon for Grammar Quest card */
+    .card-icon .mini-pokeball {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom, #e03030 50%, #fff 50%);
+      border: 4px solid #444;
+      position: relative;
+      box-shadow: 0 4px 15px rgba(224, 48, 48, 0.3);
+    }
+    .card-icon .mini-pokeball::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #444;
+      transform: translateY(-50%);
+    }
+    .card-icon .mini-pokeball::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      border: 4px solid #444;
+      z-index: 2;
+    }
+
+    /* Sprite overlay on Poke Ball */
+    .card-icon img {
+      position: absolute;
+      bottom: -2px;
+      right: -8px;
+      width: 48px;
+      height: 48px;
+      image-rendering: pixelated;
+      z-index: 3;
+      filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5));
+    }
+
+    .project-card h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.4rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .project-tags {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(255, 215, 0, 0.15);
+      color: #FFD700;
+      border: 1px solid rgba(255, 215, 0, 0.25);
+    }
+
+    .project-card p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #bbc;
+      margin-bottom: 20px;
+    }
+
+    .play-btn {
+      display: inline-block;
+      padding: 12px 32px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: #fff;
+      background: linear-gradient(to bottom, #e03030, #c02020);
+      border: none;
+      border-radius: 30px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #901818, 0 6px 20px rgba(224, 48, 48, 0.3);
+      transition: all 0.15s ease;
+      letter-spacing: 0.5px;
+    }
+    .play-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #901818, 0 8px 25px rgba(224, 48, 48, 0.4);
+    }
+    .play-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #901818, 0 3px 10px rgba(224, 48, 48, 0.3);
+    }
+
+    /* ======================== */
+    /* COMING SOON CARD         */
+    /* ======================== */
+    .project-card.coming-soon {
+      opacity: 0.5;
+      border-style: dashed;
+    }
+    .project-card.coming-soon:hover {
+      transform: none;
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: none;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .coming-soon-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      opacity: 0.5;
+    }
+    .coming-soon-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.9rem;
+      color: #888;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 30px;
+    }
+
+    /* ======================== */
+    /* FOOTER                   */
+    /* ======================== */
+    .footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: #667;
+      font-size: 0.85rem;
+    }
+    .footer a {
+      color: #889;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      color: #FFD700;
+    }
+
+    /* ======================== */
+    /* RESPONSIVE               */
+    /* ======================== */
+    @media (max-width: 600px) {
+      .site-title { font-size: 2rem; }
+      .site-subtitle { font-size: 1rem; }
+      .container { padding: 30px 16px 40px; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .project-card { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Starfield -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Floating Poke Balls -->
+  <div class="floating-balls" id="floatingBalls"></div>
+
+  <!-- Main Content -->
+  <div class="container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <div class="pokeball"></div>
+      </div>
+      <h1 class="site-title">McGowan Learning Lab</h1>
+      <p class="site-subtitle">Educational games &amp; tools for young trainers</p>
+    </header>
+
+    <!-- Projects -->
+    <h2 class="section-title">Choose Your Adventure!</h2>
+
+    <div class="projects-grid">
+
+      <!-- Grammar Quest Card -->
+      <div class="project-card">
+        <div class="card-icon">
+          <div class="mini-pokeball"></div>
+          <img
+            src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
+            alt="Pikachu"
+          >
+        </div>
+        <h3>Grammar Quest</h3>
+        <div class="project-tags">
+          <span class="tag">Grammar</span>
+          <span class="tag">3rd Grade</span>
+          <span class="tag">Pokemon</span>
+        </div>
+        <p>Catch 'em all &mdash; learn every grammar type! A Pokemon-themed flashcard game with quizzes, battles, and a Grammardex to fill.</p>
+        <a href="./grammar-quest/" class="play-btn">Play Now!</a>
+      </div>
+
+      <!-- Coming Soon Placeholder -->
+      <div class="project-card coming-soon">
+        <div class="coming-soon-icon">?</div>
+        <h3>Next Adventure</h3>
+        <div class="project-tags">
+          <span class="tag">Coming Soon</span>
+        </div>
+        <p>More learning games are on the way! Stay tuned for the next adventure.</p>
+        <span class="coming-soon-badge">Coming Soon</span>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Powered by <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a></p>
+    </footer>
+
+  </div>
+
+  <script>
+    // Generate starfield
+    (function() {
+      const container = document.getElementById('stars');
+      const count = 80;
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 2.5 + 0.5;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = (Math.random() * 3) + 's';
+        star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        container.appendChild(star);
+      }
+    })();
+
+    // Generate floating Poke Balls
+    (function() {
+      const container = document.getElementById('floatingBalls');
+      const count = 6;
+      for (let i = 0; i < count; i++) {
+        const ball = document.createElement('div');
+        ball.className = 'pokeball-float';
+        const size = Math.random() * 20 + 30;
+        ball.style.width = size + 'px';
+        ball.style.height = size + 'px';
+        ball.style.left = Math.random() * 100 + '%';
+        ball.style.animationDelay = (Math.random() * 20) + 's';
+        ball.style.animationDuration = (Math.random() * 15 + 15) + 's';
+        container.appendChild(ball);
+      }
+    })();
+  </script>
+
+</body>
+</html>
