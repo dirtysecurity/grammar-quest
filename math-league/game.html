@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pokémon Math League</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #1a1a2e;
+  --bg2: #16213e;
+  --text: #eee;
+  --yellow: #F8D030;
+  --red: #E74C3C;
+  --green: #2ECC71;
+  --blue: #3498DB;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+h1, h2, h3 { font-family: 'Fredoka One', cursive; }
+.screen { display: none; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
+.screen.active { display: flex; }
+
+/* TITLE SCREEN */
+#title-screen { justify-content: center; text-align: center; }
+#title-screen h1 { font-size: 2.2rem; color: var(--yellow); text-shadow: 2px 2px 0 #b8860b; margin-bottom: 5px; }
+#title-screen .subtitle { color: #aaa; margin-bottom: 25px; font-size: 1.1rem; }
+.name-input { font-size: 1.2rem; padding: 12px 20px; border-radius: 25px; border: 3px solid var(--yellow); background: var(--bg2); color: var(--text); text-align: center; width: 260px; outline: none; }
+.name-input:focus { border-color: #fff; }
+.btn { font-family: 'Fredoka One', cursive; font-size: 1.1rem; padding: 12px 30px; border-radius: 25px; border: none; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+.btn:hover { transform: scale(1.05); }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--yellow); color: #333; box-shadow: 0 4px 0 #b8860b; margin-top: 15px; }
+.btn-secondary { background: var(--blue); color: #fff; box-shadow: 0 4px 0 #2471a3; margin-top: 10px; }
+
+/* MAP SCREEN */
+#map-screen { padding-top: 15px; }
+#map-screen h2 { color: var(--yellow); margin-bottom: 5px; font-size: 1.5rem; }
+.badge-bar { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
+.badge-slot { width: 32px; height: 32px; border-radius: 50%; background: #333; border: 2px solid #555; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.3s; }
+.badge-slot.earned { border-color: var(--yellow); background: #2a2a1e; box-shadow: 0 0 8px rgba(248,208,48,0.4); }
+.gym-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 500px; width: 100%; }
+.gym-card { background: var(--bg2); border-radius: 15px; padding: 15px 10px; text-align: center; cursor: pointer; border: 3px solid #333; transition: all 0.2s; position: relative; }
+.gym-card:hover { transform: translateY(-3px); border-color: #555; }
+.gym-card.completed { border-color: var(--yellow); }
+.gym-card.locked { opacity: 0.5; pointer-events: none; }
+.gym-card img { width: 56px; height: 56px; image-rendering: pixelated; }
+.gym-card .gym-name { font-family: 'Fredoka One', cursive; font-size: 0.8rem; margin-top: 5px; }
+.gym-card .gym-tag { font-size: 0.65rem; color: #aaa; }
+.gym-card .gym-badge-icon { position: absolute; top: 6px; right: 8px; font-size: 18px; }
+.gym-card .gym-best { font-size: 0.6rem; color: var(--yellow); margin-top: 3px; }
+
+/* INTRO SCREEN */
+#intro-screen { justify-content: center; text-align: center; }
+.intro-pokemon { width: 120px; height: 120px; image-rendering: pixelated; }
+.intro-title { font-size: 1.6rem; margin: 10px 0 5px; }
+.intro-desc { color: #ccc; max-width: 350px; margin-bottom: 8px; }
+.intro-concepts { font-size: 0.85rem; color: #aaa; max-width: 320px; margin-bottom: 15px; }
+
+/* GAME SCREEN */
+#game-screen { padding-top: 10px; }
+.game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; margin-bottom: 8px; }
+.game-header .trainer { font-family: 'Fredoka One', cursive; font-size: 0.9rem; color: var(--yellow); }
+.game-header .score-area { font-family: 'Fredoka One', cursive; font-size: 0.9rem; }
+.progress-track { width: 100%; max-width: 500px; height: 8px; background: #333; border-radius: 4px; margin-bottom: 12px; }
+.progress-fill { height: 100%; background: var(--yellow); border-radius: 4px; transition: width 0.4s; }
+.question-area { background: var(--bg2); border-radius: 16px; padding: 20px; width: 100%; max-width: 500px; min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; border: 2px solid #333; }
+.question-area .q-label { font-family: 'Fredoka One', cursive; color: var(--yellow); font-size: 0.85rem; margin-bottom: 8px; }
+.question-area .q-text { font-size: 1.1rem; text-align: center; line-height: 1.5; }
+.question-area .q-visual { margin: 12px 0; display: flex; justify-content: center; }
+.answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px; }
+.answer-btn { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem; padding: 14px 10px; border-radius: 12px; border: 3px solid #444; background: var(--bg2); color: var(--text); cursor: pointer; transition: all 0.15s; text-align: center; word-break: break-word; }
+.answer-btn:hover { border-color: var(--yellow); background: #1e2a4a; }
+.answer-btn.correct { border-color: var(--green); background: rgba(46,204,113,0.2); color: var(--green); }
+.answer-btn.wrong { border-color: var(--red); background: rgba(231,76,60,0.2); color: var(--red); }
+.feedback { font-family: 'Fredoka One', cursive; font-size: 1.2rem; margin-top: 10px; min-height: 30px; text-align: center; }
+.streak-display { font-size: 0.8rem; color: var(--yellow); margin-top: 2px; }
+.xp-popup { position: fixed; font-family: 'Fredoka One', cursive; color: var(--yellow); font-size: 1.2rem; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 99; }
+@keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-40px); } }
+
+/* RESULTS SCREEN */
+#results-screen { justify-content: center; text-align: center; }
+.results-pokemon { width: 100px; height: 100px; image-rendering: pixelated; }
+.results-title { font-size: 1.5rem; color: var(--yellow); margin: 10px 0; }
+.results-score { font-size: 1.1rem; margin-bottom: 5px; }
+.results-badge { font-size: 3rem; margin: 10px 0; }
+.results-msg { color: #ccc; max-width: 320px; margin-bottom: 15px; }
+.results-stats { font-size: 0.85rem; color: #aaa; margin-bottom: 15px; }
+
+/* SVG visuals */
+.q-visual svg { max-width: 100%; height: auto; }
+.q-visual svg text { font-family: 'Nunito', sans-serif; }
+
+/* Audio toggle */
+.audio-toggle { position: fixed; top: 10px; right: 10px; background: none; border: none; font-size: 24px; cursor: pointer; z-index: 50; }
+
+@media (max-width: 480px) {
+  .gym-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .gym-card { padding: 10px 5px; }
+  .gym-card img { width: 44px; height: 44px; }
+  .gym-card .gym-name { font-size: 0.7rem; }
+  .answer-grid { grid-template-columns: 1fr; }
+  .question-area { padding: 15px; }
+}
+</style>
+</head>
+<body>
+
+<button class="audio-toggle" onclick="toggleAudio()" id="audioBtn">🔊</button>
+
+<!-- TITLE SCREEN -->
+<div id="title-screen" class="screen active">
+  <h1>⚡ Pokémon Math League ⚡</h1>
+  <div class="subtitle">Train Your Brain, Earn Your Badges!</div>
+  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" width="96" height="96" style="image-rendering:pixelated; margin-bottom:10px;">
+  <input type="text" class="name-input" id="trainerName" placeholder="Enter Trainer Name" maxlength="20">
+  <button class="btn btn-primary" onclick="goToMap()">Start Adventure!</button>
+</div>
+
+<!-- MAP SCREEN -->
+<div id="map-screen" class="screen">
+  <h2 id="mapGreeting">Gym Map</h2>
+  <div class="badge-bar" id="badgeBar"></div>
+  <div class="gym-grid" id="gymGrid"></div>
+  <div style="margin-top:15px; font-size:0.75rem; color:#666;">Earn all 8 badges to unlock the Elite Four!</div>
+</div>
+
+<!-- INTRO SCREEN -->
+<div id="intro-screen" class="screen">
+  <img class="intro-pokemon" id="introSprite" src="">
+  <div class="intro-title" id="introTitle"></div>
+  <div class="intro-desc" id="introDesc"></div>
+  <div class="intro-concepts" id="introConcepts"></div>
+  <button class="btn btn-primary" onclick="startGym()">Battle!</button>
+  <button class="btn btn-secondary" onclick="showScreen('map-screen')" style="font-size:0.9rem; padding:8px 20px;">Back</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game-screen" class="screen">
+  <div class="game-header">
+    <div class="trainer" id="gameTrainer"></div>
+    <div class="score-area">⭐ <span id="scoreDisplay">0</span> XP</div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="question-area" id="questionArea"></div>
+  <div class="answer-grid" id="answerGrid"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="streak-display" id="streakDisplay"></div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="results-screen" class="screen">
+  <img class="results-pokemon" id="resultsSprite" src="">
+  <div class="results-title" id="resultsTitle"></div>
+  <div class="results-score" id="resultsScore"></div>
+  <div class="results-badge" id="resultsBadge"></div>
+  <div class="results-msg" id="resultsMsg"></div>
+  <div class="results-stats" id="resultsStats"></div>
+  <button class="btn btn-primary" onclick="showScreen('map-screen'); renderMap();">Back to Map</button>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const SB = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
+const ITEMS = [
+  {n:"Poké Ball",p:200},{n:"Great Ball",p:475},{n:"Potion",p:300},{n:"Super Potion",p:550},
+  {n:"Antidote",p:125},{n:"Repel",p:350},{n:"Oran Berry",p:75},{n:"Revive",p:750},
+  {n:"Full Heal",p:600},{n:"Lemonade",p:225},{n:"Escape Rope",p:275},{n:"Rare Candy",p:999}
+];
+const TRAINERS = ["Ash","Misty","Brock","May","Dawn","Gary","Serena","Iris","Cilan","Tracey"];
+const POKEMON_NAMES = ["Pikachu","Charmander","Squirtle","Bulbasaur","Eevee","Jigglypuff","Meowth","Snorlax","Pidgey","Geodude","Magikarp","Psyduck","Vulpix","Growlithe","Abra","Zubat","Gastly","Machop","Butterfree","Caterpie"];
+const DAYS = ["Mon","Tue","Wed","Thu","Fri"];
+
+// ============================================================
+// UTILITY
+// ============================================================
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[randInt(0,a.length-1)];}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=randInt(0,i);[b[i],b[j]]=[b[j],b[i]];}return b;}
+function money(c){return "$"+((c<0?0:c)/100).toFixed(2);}
+function commaNum(n){return n.toLocaleString();}
+function makeChoices(correct, wrongs){
+  const w = wrongs.filter(x=>x!==correct);
+  while(w.length<3){let f=correct+(w.length+1); if(!w.includes(String(f))&&String(f)!==correct) w.push(String(f));}
+  const all = shuffle([String(correct),...w.slice(0,3)]);
+  return all.map(String);
+}
+function nearbyWrongs(correct, count=3, spread=3){
+  const s=new Set();let tries=0;
+  while(s.size<count&&tries<80){
+    const off=randInt(1,spread)*(Math.random()<0.5?-1:1);
+    const w=correct+off;
+    if(w>0&&w!==correct)s.add(w);
+    tries++;
+  }
+  let fb=correct+1;while(s.size<count){if(fb!==correct)s.add(fb);fb++;}
+  return[...s].slice(0,count);
+}
+function moneyWrongs(c,count=3){
+  const offsets=shuffle([25,50,75,100,-25,-50,-75,-100,125,-125,150,200]);
+  const s=new Set();
+  for(const o of offsets){const w=c+o;if(w>0&&w!==c&&s.size<count)s.add(w);}
+  let fb=c+25;while(s.size<count){if(fb!==c&&fb>0)s.add(fb);fb+=25;}
+  return[...s].slice(0,count).map(x=>money(x));
+}
+
+// ============================================================
+// SVG VISUAL HELPERS
+// ============================================================
+function clockSVG(hour, minute, size=140){
+  const cx=size/2,cy=size/2,r=size/2-10;
+  let s=`<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="white" stroke="#333" stroke-width="3"/>`;
+  for(let n=1;n<=12;n++){
+    const a=(n/12)*2*Math.PI-Math.PI/2;
+    const x=cx+(r-14)*Math.cos(a),y=cy+(r-14)*Math.sin(a);
+    s+=`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="bold" fill="#333">${n}</text>`;
+  }
+  for(let t=0;t<60;t++){
+    const a=(t/60)*2*Math.PI-Math.PI/2;
+    const len=t%5===0?8:4;
+    const x1=cx+(r-2)*Math.cos(a),y1=cy+(r-2)*Math.sin(a);
+    const x2=cx+(r-2-len)*Math.cos(a),y2=cy+(r-2-len)*Math.sin(a);
+    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#999" stroke-width="${t%5===0?1.5:0.5}"/>`;
+  }
+  const ha=((hour%12+minute/60)/12)*2*Math.PI-Math.PI/2;
+  s+=`<line x1="${cx}" y1="${cy}" x2="${cx+(r*0.5)*Math.cos(ha)}" y2="${cy+(r*0.5)*Math.sin(ha)}" stroke="#333" stroke-width="4" stroke-linecap="round"/>`;
+  const ma=(minute/60)*2*Math.PI-Math.PI/2;
+  s+=`<line x1="${cx}" y1="${cy}" x2="${cx+(r*0.7)*Math.cos(ma)}" y2="${cy+(r*0.7)*Math.sin(ma)}" stroke="${'#E74C3C'}" stroke-width="2.5" stroke-linecap="round"/>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="4" fill="#333"/>`;
+  s+=`</svg>`;
+  return s;
+}
+
+function thermoSVG(temp, minT=0, maxT=120){
+  let s=`<svg viewBox="0 0 70 200" width="70" height="200">`;
+  const pct=Math.max(0,Math.min(1,(temp-minT)/(maxT-minT)));
+  const fh=pct*130;
+  s+=`<rect x="22" y="15" width="20" height="145" rx="10" fill="#e8e8e8" stroke="#333" stroke-width="2"/>`;
+  s+=`<rect x="24" y="${160-fh}" width="16" height="${fh}" rx="8" fill="#E74C3C"/>`;
+  s+=`<circle cx="32" cy="172" r="16" fill="#E74C3C" stroke="#333" stroke-width="2"/>`;
+  for(let t=minT;t<=maxT;t+=20){
+    const y=158-((t-minT)/(maxT-minT))*130;
+    s+=`<line x1="44" y1="${y}" x2="52" y2="${y}" stroke="#333" stroke-width="1"/>`;
+    s+=`<text x="55" y="${y+4}" font-size="10" fill="#333">${t}°F</text>`;
+  }
+  s+=`</svg>`;
+  return s;
+}
+
+function barGraphSVG(data, w=300, h=200){
+  const maxV=Math.max(...data.map(d=>d.v))+1;
+  const pad={t:15,r:10,b:30,l:32};
+  const pw=w-pad.l-pad.r, ph=h-pad.t-pad.b;
+  const bw=pw/data.length-6;
+  const cols=["#E74C3C","#3498DB","#2ECC71","#F39C12","#9B59B6","#1ABC9C","#E67E22"];
+  let s=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="white" rx="8"/>`;
+  s+=`<line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${h-pad.b}" stroke="#333" stroke-width="1"/>`;
+  s+=`<line x1="${pad.l}" y1="${h-pad.b}" x2="${w-pad.r}" y2="${h-pad.b}" stroke="#333" stroke-width="1"/>`;
+  const step=Math.ceil(maxV/5)||1;
+  for(let v=0;v<=maxV;v+=step){
+    const y=(h-pad.b)-((v/maxV)*ph);
+    s+=`<text x="${pad.l-4}" y="${y+4}" text-anchor="end" font-size="10" fill="#333">${v}</text>`;
+    s+=`<line x1="${pad.l}" y1="${y}" x2="${w-pad.r}" y2="${y}" stroke="#eee" stroke-width="0.5"/>`;
+  }
+  data.forEach((d,i)=>{
+    const bh=(d.v/maxV)*ph;
+    const x=pad.l+6+i*(bw+6);
+    const y=(h-pad.b)-bh;
+    s+=`<rect x="${x}" y="${y}" width="${bw}" height="${bh}" fill="${cols[i%cols.length]}" rx="3"/>`;
+    s+=`<text x="${x+bw/2}" y="${y-3}" text-anchor="middle" font-size="9" fill="#333" font-weight="bold">${d.v}</text>`;
+    s+=`<text x="${x+bw/2}" y="${h-pad.b+14}" text-anchor="middle" font-size="9" fill="#333">${d.l}</text>`;
+  });
+  s+=`</svg>`;
+  return s;
+}
+
+function lineGraphSVG(data, w=300, h=190){
+  const maxV=Math.max(...data.map(d=>d.v))+2;
+  const pad={t:15,r:15,b:30,l:32};
+  const pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+  let s=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="white" rx="8"/>`;
+  s+=`<line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${h-pad.b}" stroke="#333" stroke-width="1"/>`;
+  s+=`<line x1="${pad.l}" y1="${h-pad.b}" x2="${w-pad.r}" y2="${h-pad.b}" stroke="#333" stroke-width="1"/>`;
+  const step=Math.ceil(maxV/5)||1;
+  for(let v=0;v<=maxV;v+=step){
+    const y=(h-pad.b)-(v/maxV)*ph;
+    s+=`<text x="${pad.l-4}" y="${y+4}" text-anchor="end" font-size="10" fill="#333">${v}</text>`;
+    s+=`<line x1="${pad.l}" y1="${y}" x2="${w-pad.r}" y2="${y}" stroke="#eee" stroke-width="0.5"/>`;
+  }
+  const pts=data.map((d,i)=>({
+    x:pad.l+(i/(data.length-1))*pw,
+    y:(h-pad.b)-(d.v/maxV)*ph
+  }));
+  let path=`M ${pts[0].x} ${pts[0].y}`;
+  for(let i=1;i<pts.length;i++) path+=` L ${pts[i].x} ${pts[i].y}`;
+  s+=`<path d="${path}" fill="none" stroke="#3498DB" stroke-width="2.5"/>`;
+  pts.forEach((p,i)=>{
+    s+=`<circle cx="${p.x}" cy="${p.y}" r="4" fill="#3498DB"/>`;
+    s+=`<text x="${p.x}" y="${h-pad.b+14}" text-anchor="middle" font-size="9" fill="#333">${data[i].l}</text>`;
+  });
+  s+=`</svg>`;
+  return s;
+}
+
+function vennSVG(d){
+  let s=`<svg viewBox="0 0 320 200" width="320" height="200"><rect width="320" height="200" fill="white" rx="8"/>`;
+  s+=`<circle cx="120" cy="105" r="80" fill="rgba(231,76,60,0.15)" stroke="#E74C3C" stroke-width="2"/>`;
+  s+=`<circle cx="200" cy="105" r="80" fill="rgba(52,152,219,0.15)" stroke="#3498DB" stroke-width="2"/>`;
+  s+=`<text x="78" y="25" text-anchor="middle" font-size="11" font-weight="bold" fill="#E74C3C">${d.tA}</text>`;
+  s+=`<text x="242" y="25" text-anchor="middle" font-size="11" font-weight="bold" fill="#3498DB">${d.tB}</text>`;
+  d.oA.forEach((item,i)=>{s+=`<text x="72" y="${65+i*20}" text-anchor="middle" font-size="10" fill="#333">${item}</text>`;});
+  d.both.forEach((item,i)=>{s+=`<text x="160" y="${80+i*20}" text-anchor="middle" font-size="10" fill="#333" font-weight="bold">${item}</text>`;});
+  d.oB.forEach((item,i)=>{s+=`<text x="248" y="${65+i*20}" text-anchor="middle" font-size="10" fill="#333">${item}</text>`;});
+  s+=`</svg>`;
+  return s;
+}
+
+function numberLineSVG(denom, highlight, w=340, h=60){
+  let s=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="white" rx="6"/>`;
+  const y=28,x1=25,x2=w-25,len=x2-x1;
+  s+=`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#333" stroke-width="2"/>`;
+  s+=`<polygon points="${x2},${y} ${x2-6},${y-4} ${x2-6},${y+4}" fill="#333"/>`;
+  for(let i=0;i<=denom;i++){
+    const x=x1+(i/denom)*len;
+    const th=(i===0||i===denom)?12:8;
+    s+=`<line x1="${x}" y1="${y-th}" x2="${x}" y2="${y+th}" stroke="#333" stroke-width="1.5"/>`;
+    if(i===0) s+=`<text x="${x}" y="${y+24}" text-anchor="middle" font-size="11" fill="#333">0</text>`;
+    else if(i===denom) s+=`<text x="${x}" y="${y+24}" text-anchor="middle" font-size="11" fill="#333">1</text>`;
+    if(i===highlight){
+      s+=`<circle cx="${x}" cy="${y}" r="6" fill="#E74C3C"/>`;
+      s+=`<text x="${x}" y="${y-16}" text-anchor="middle" font-size="14" fill="#E74C3C" font-weight="bold">?</text>`;
+    }
+  }
+  s+=`</svg>`;
+  return s;
+}
+
+function fractionBarSVG(num,den,w=180,h=36){
+  let s=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`;
+  const sw=w/den;
+  for(let i=0;i<den;i++){
+    s+=`<rect x="${i*sw}" y="0" width="${sw}" height="${h}" fill="${i<num?'#F8D030':'#e8e8e8'}" stroke="#333" stroke-width="1.5"/>`;
+  }
+  s+=`</svg>`;
+  return s;
+}
+
+function drawShape(name, size=90){
+  const shapes={
+    circle:`<circle cx="50" cy="50" r="40" fill="#F8D030" stroke="#333" stroke-width="2"/>`,
+    square:`<rect x="10" y="10" width="80" height="80" fill="#3498DB" stroke="#333" stroke-width="2"/>`,
+    rectangle:`<rect x="5" y="20" width="90" height="60" fill="#2ECC71" stroke="#333" stroke-width="2"/>`,
+    triangle:`<polygon points="50,8 8,88 92,88" fill="#E74C3C" stroke="#333" stroke-width="2"/>`,
+    heart:`<path d="M50,82 C25,58 5,38 5,24 C5,12 17,4 28,4 C38,4 46,10 50,17 C54,10 62,4 72,4 C83,4 95,12 95,24 C95,38 75,58 50,82Z" fill="#E74C3C" stroke="#333" stroke-width="2"/>`,
+    star:`<polygon points="50,5 61,35 95,38 70,58 78,90 50,73 22,90 30,58 5,38 39,35" fill="#F39C12" stroke="#333" stroke-width="2"/>`,
+    hexagon:`<polygon points="50,5 90,27 90,73 50,95 10,73 10,27" fill="#9B59B6" stroke="#333" stroke-width="2"/>`,
+    arrow:`<polygon points="50,5 88,42 65,42 65,95 35,95 35,42 12,42" fill="#1ABC9C" stroke="#333" stroke-width="2"/>`,
+    diamond:`<polygon points="50,5 95,50 50,95 5,50" fill="#E67E22" stroke="#333" stroke-width="2"/>`,
+    oval:`<ellipse cx="50" cy="50" rx="45" ry="28" fill="#F1C40F" stroke="#333" stroke-width="2"/>`,
+    trapezoid:`<polygon points="30,15 70,15 95,85 5,85" fill="#16A085" stroke="#333" stroke-width="2"/>`,
+    parallelogram:`<polygon points="25,15 90,15 75,85 10,85" fill="#D35400" stroke="#333" stroke-width="2"/>`
+  };
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}">${shapes[name]||''}</svg>`;
+}
+
+const SHAPE_SYM={
+  circle:{lines:"many",num:99,has:true,label:"Circle"},
+  square:{lines:4,num:4,has:true,label:"Square"},
+  rectangle:{lines:2,num:2,has:true,label:"Rectangle"},
+  triangle:{lines:3,num:3,has:true,label:"Equilateral Triangle"},
+  heart:{lines:1,num:1,has:true,label:"Heart"},
+  star:{lines:5,num:5,has:true,label:"Star"},
+  hexagon:{lines:6,num:6,has:true,label:"Regular Hexagon"},
+  arrow:{lines:1,num:1,has:true,label:"Arrow"},
+  diamond:{lines:2,num:2,has:true,label:"Diamond"},
+  oval:{lines:2,num:2,has:true,label:"Oval"},
+  trapezoid:{lines:0,num:0,has:false,label:"Trapezoid"},
+  parallelogram:{lines:0,num:0,has:false,label:"Parallelogram"}
+};
+
+// ============================================================
+// GYM DEFINITIONS
+// ============================================================
+const gyms = [
+  // ---- 1. POKEMART GYM (Money) ----
+  {
+    id:'pokemart', name:'PokéMart Gym', leader:'Meowth', sprite:SB+'52.png',
+    color:'#F8D030', badge:'💰', badgeName:'Coin Badge',
+    desc:'Master money skills at the PokéMart! Add prices, make change, and round like a pro.',
+    concepts:'Counting, Adding & Subtracting Money • Rounding Money',
+    generate(){
+      const qs=[];
+      // Add prices (3)
+      for(let i=0;i<3;i++){
+        const a=pick(ITEMS),b=pick(ITEMS.filter(x=>x!==a));
+        const total=a.p+b.p;
+        qs.push({
+          html:`<div class="q-label">PokéMart Purchase</div><div class="q-text">A trainer buys a <b>${a.n}</b> (${money(a.p)}) and a <b>${b.n}</b> (${money(b.p)}).<br>What is the total cost?</div>`,
+          correct:money(total), wrongs:moneyWrongs(total), concept:'Adding Money'
+        });
+      }
+      // Make change (3)
+      for(let i=0;i<3;i++){
+        const item=pick(ITEMS);
+        const paid=(Math.ceil(item.p/500)+1)*500;
+        const change=paid-item.p;
+        qs.push({
+          html:`<div class="q-label">Making Change</div><div class="q-text">A <b>${item.n}</b> costs ${money(item.p)}. The trainer pays with ${money(paid)}.<br>How much change do they get back?</div>`,
+          correct:money(change), wrongs:moneyWrongs(change), concept:'Subtracting Money'
+        });
+      }
+      // Count coins (2)
+      for(let i=0;i<2;i++){
+        const quarters=randInt(1,4),dimes=randInt(0,4),nickels=randInt(0,3),pennies=randInt(0,4);
+        const total=quarters*25+dimes*10+nickels*5+pennies;
+        const parts=[];
+        if(quarters)parts.push(`${quarters} quarter${quarters>1?'s':''}`);
+        if(dimes)parts.push(`${dimes} dime${dimes>1?'s':''}`);
+        if(nickels)parts.push(`${nickels} nickel${nickels>1?'s':''}`);
+        if(pennies)parts.push(`${pennies} penn${pennies>1?'ies':'y'}`);
+        qs.push({
+          html:`<div class="q-label">Count the Coins!</div><div class="q-text">A trainer finds: <b>${parts.join(', ')}</b>.<br>How much money is that?</div>`,
+          correct:money(total), wrongs:moneyWrongs(total), concept:'Counting Money'
+        });
+      }
+      // Round (2)
+      for(let i=0;i<2;i++){
+        const item=pick(ITEMS);
+        const rounded=Math.round(item.p/100)*100;
+        qs.push({
+          html:`<div class="q-label">Rounding Money</div><div class="q-text">A <b>${item.n}</b> costs ${money(item.p)}.<br>What is that rounded to the nearest dollar?</div>`,
+          correct:money(rounded), wrongs:[money(rounded-100),money(rounded+100),money(rounded+(rounded>item.p?-200:200))].filter(x=>x!==money(rounded)&&parseFloat(x.slice(1))>0),
+          concept:'Rounding Money'
+        });
+      }
+      return shuffle(qs);
+    }
+  },
+
+  // ---- 2. BATTLE GYM (Large Numbers) ----
+  {
+    id:'battle', name:'Battle Gym', leader:'Machamp', sprite:SB+'68.png',
+    color:'#C03028', badge:'⚔️', badgeName:'Power Badge',
+    desc:'Calculate massive battle damage! Add and subtract large numbers and master expanded form.',
+    concepts:'Adding & Subtracting Large Numbers • Subtraction Across Zeros • Expanded Form to a Million',
+    generate(){
+      const qs=[];
+      const poke=()=>pick(POKEMON_NAMES);
+      // Add large (2)
+      for(let i=0;i<2;i++){
+        const a=randInt(1200,8500),b=randInt(1100,7500);
+        const ans=a+b;
+        qs.push({
+          html:`<div class="q-label">Battle Boost!</div><div class="q-text">${poke()} has <b>${commaNum(a)}</b> HP and gets a boost of <b>${commaNum(b)}</b> HP.<br>What is the new HP total?</div>`,
+          correct:commaNum(ans), wrongs:nearbyWrongs(ans,3,150).map(commaNum), concept:'Adding Large Numbers'
+        });
+      }
+      // Subtract large (2)
+      for(let i=0;i<2;i++){
+        const hp=randInt(5000,15000),dmg=randInt(1200,hp-500);
+        const ans=hp-dmg;
+        qs.push({
+          html:`<div class="q-label">Battle Damage!</div><div class="q-text">${poke()} has <b>${commaNum(hp)}</b> HP and takes <b>${commaNum(dmg)}</b> damage.<br>How much HP is left?</div>`,
+          correct:commaNum(ans), wrongs:nearbyWrongs(ans,3,200).map(commaNum), concept:'Subtracting Large Numbers'
+        });
+      }
+      // Subtraction across zeros (3)
+      for(let i=0;i<3;i++){
+        const bases=[10000,5000,20000,10000,50000];
+        const base=pick(bases);
+        const sub=randInt(1111,Math.min(base-100,4999));
+        const ans=base-sub;
+        qs.push({
+          html:`<div class="q-label">Across-Zero Attack!</div><div class="q-text">${poke()} has <b>${commaNum(base)}</b> HP and loses <b>${commaNum(sub)}</b>.<br>What is ${commaNum(base)} − ${commaNum(sub)}?</div>`,
+          correct:commaNum(ans), wrongs:nearbyWrongs(ans,3,300).map(commaNum), concept:'Subtraction Across Zeros'
+        });
+      }
+      // Expanded → standard (2)
+      for(let i=0;i<2;i++){
+        const digits=[randInt(1,9)*10000,randInt(1,9)*1000,randInt(1,9)*100,randInt(1,9)*10,randInt(1,9)];
+        const num=digits.reduce((a,b)=>a+b,0);
+        const exp=digits.map(d=>commaNum(d)).join(' + ');
+        qs.push({
+          html:`<div class="q-label">Expanded Form</div><div class="q-text">What number is this?<br><b>${exp}</b></div>`,
+          correct:commaNum(num), wrongs:nearbyWrongs(num,3,1500).map(commaNum), concept:'Expanded Form'
+        });
+      }
+      // Standard → expanded (1)
+      {
+        const d=[randInt(1,9)*100000,randInt(1,9)*10000,randInt(1,9)*1000,randInt(1,9)*100,randInt(0,9)*10,randInt(1,9)];
+        const num=d.reduce((a,b)=>a+b,0);
+        const correct=d.filter(x=>x>0).map(x=>commaNum(x)).join(' + ');
+        const w1=d.filter(x=>x>0); w1[0]+=10000;
+        const w2=d.filter(x=>x>0); w2[1]=(w2[1]||0)+100;
+        const w3=[...d]; w3.reverse();
+        qs.push({
+          html:`<div class="q-label">Expanded Form</div><div class="q-text">Write <b>${commaNum(num)}</b> in expanded form:</div>`,
+          correct:correct,
+          wrongs:[
+            w1.map(x=>commaNum(Math.abs(x))).join(' + '),
+            w2.filter(x=>x>0).map(x=>commaNum(x)).join(' + '),
+            w3.filter(x=>x>0).map(x=>commaNum(x)).join(' + ')
+          ], concept:'Expanded Form'
+        });
+      }
+      return shuffle(qs);
+    }
+  },
+
+  // ---- 3. BERRY GYM (Fractions) ----
+  {
+    id:'berry', name:'Berry Gym', leader:'Snorlax', sprite:SB+'143.png',
+    color:'#A8A878', badge:'🍕', badgeName:'Berry Badge',
+    desc:'Split berries fairly! Compare fractions, find equivalents, and master mixed numbers.',
+    concepts:'Comparing & Ordering Fractions • Equivalent Fractions • Fraction Halves • Fractions on a Number Line • Mixed Numbers • Fractions Equal to One',
+    generate(){
+      const qs=[];
+      const frac=(n,d)=>`${n}/${d}`;
+      // Compare fractions (2)
+      const comparePairs=shuffle([[1,3,2,3],[1,4,1,2],[2,5,3,5],[1,2,3,4],[2,3,3,4],[1,6,1,3],[3,8,1,2],[2,4,3,4]]);
+      for(let i=0;i<2;i++){
+        const [a,b,c,d]=comparePairs[i];
+        const av=a/b,cv=c/d;
+        const bigger=av>cv?frac(a,b):frac(c,d);
+        const other=av>cv?frac(c,d):frac(a,b);
+        qs.push({
+          html:`<div class="q-label">Compare Fractions!</div><div class="q-text">Which fraction is <b>greater</b>?</div><div class="q-visual">${fractionBarSVG(a,b)} &nbsp;<b>${frac(a,b)}</b> &nbsp;&nbsp;vs&nbsp;&nbsp; <b>${frac(c,d)}</b>&nbsp; ${fractionBarSVG(c,d)}</div>`,
+          correct:bigger, wrongs:[other, "They are equal", frac(a+c,b+d)], concept:'Comparing Fractions'
+        });
+      }
+      // Equivalent fractions (2)
+      for(let i=0;i<2;i++){
+        const pairs=[[1,2,2,4],[1,3,2,6],[2,4,1,2],[1,4,2,8],[2,3,4,6],[3,4,6,8]];
+        const [n,d,en,ed]=pick(pairs);
+        const wrongPairs=[[n+1,d],[n,d+1],[n*2,d+2]].map(([a,b])=>frac(a,b));
+        qs.push({
+          html:`<div class="q-label">Equivalent Fractions!</div><div class="q-text">Which fraction is <b>equal</b> to <b>${frac(n,d)}</b>?</div><div class="q-visual">${fractionBarSVG(n,d)}</div>`,
+          correct:frac(en,ed), wrongs:wrongPairs, concept:'Equivalent Fractions'
+        });
+      }
+      // Number line (2)
+      for(let i=0;i<2;i++){
+        const den=pick([3,4,5,6,8]);
+        const num=randInt(1,den-1);
+        qs.push({
+          html:`<div class="q-label">Fraction Number Line!</div><div class="q-text">What fraction does the <span style="color:#E74C3C;">red dot</span> point to?</div><div class="q-visual">${numberLineSVG(den,num)}</div>`,
+          correct:frac(num,den), wrongs:[frac(num+1,den),frac(num,den-1||2),frac(den-num,den)].filter(x=>x!==frac(num,den)),
+          concept:'Fractions on Number Line'
+        });
+      }
+      // Mixed numbers (2)
+      for(let i=0;i<2;i++){
+        const w=randInt(1,4),n=randInt(1,3),d=pick([2,3,4,5]);
+        const imp=w*d+n;
+        if(i%2===0){
+          qs.push({
+            html:`<div class="q-label">Mixed Numbers!</div><div class="q-text">Convert <b>${w} ${frac(n,d)}</b> to an improper fraction:</div>`,
+            correct:frac(imp,d), wrongs:[frac(imp+1,d),frac(imp-1,d),frac(w+n,d)], concept:'Mixed Numbers'
+          });
+        } else {
+          qs.push({
+            html:`<div class="q-label">Mixed Numbers!</div><div class="q-text">Convert <b>${frac(imp,d)}</b> to a mixed number:</div>`,
+            correct:`${w} ${frac(n,d)}`, wrongs:[`${w+1} ${frac(n,d)}`,`${w} ${frac(n+1,d)}`,`${w-1||1} ${frac(n,d)}`], concept:'Mixed Numbers'
+          });
+        }
+      }
+      // Equal to one (1)
+      {
+        const d=pick([2,3,4,5,6,8]);
+        const wrongD=d+1;
+        qs.push({
+          html:`<div class="q-label">Fractions Equal to One!</div><div class="q-text">Which fraction is equal to <b>exactly 1 whole</b>?</div>`,
+          correct:frac(d,d), wrongs:[frac(d-1,d),frac(d+1,d),frac(d,d+1)], concept:'Fractions Equal to One'
+        });
+      }
+      // Fraction halves (1)
+      {
+        const wholes=randInt(2,8);
+        const halves=wholes*2;
+        qs.push({
+          html:`<div class="q-label">Fraction Halves!</div><div class="q-text">${pick(POKEMON_NAMES)} wants to split <b>${wholes}</b> berries equally between 2 Pokémon.<br>How many halves is that in total?</div>`,
+          correct:String(halves), wrongs:nearbyWrongs(halves,3,2).map(String), concept:'Fraction Halves'
+        });
+      }
+      return shuffle(qs);
+    }
+  },
+
+  // ---- 4. SIZE LAB GYM (Measurement) ----
+  {
+    id:'sizelab', name:'Size Lab Gym', leader:'Onix', sprite:SB+'95.png',
+    color:'#B8A038', badge:'📏', badgeName:'Scale Badge',
+    desc:'Measure Pokémon! Convert units, read temperatures, and calculate sizes.',
+    concepts:'Inches & Feet • Unit Conversions • Weight Measurements • Temperature',
+    generate(){
+      const qs=[];
+      const poke=()=>pick(POKEMON_NAMES);
+      // Feet to inches (2)
+      for(let i=0;i<2;i++){
+        const ft=randInt(2,6),inch=randInt(1,11);
+        const total=ft*12+inch;
+        qs.push({
+          html:`<div class="q-label">Pokémon Height!</div><div class="q-text">${poke()} is <b>${ft} feet ${inch} inches</b> tall.<br>How many inches is that in total?</div>`,
+          correct:`${total} inches`, wrongs:nearbyWrongs(total,3,5).map(x=>`${x} inches`), concept:'Inches and Feet'
+        });
+      }
+      // Add measurements (2)
+      for(let i=0;i<2;i++){
+        const f1=randInt(1,4),i1=randInt(3,11),f2=randInt(1,3),i2=randInt(2,10);
+        let rf=f1+f2,ri=i1+i2;
+        if(ri>=12){rf++;ri-=12;}
+        qs.push({
+          html:`<div class="q-label">Add Measurements!</div><div class="q-text">${poke()}'s tail is <b>${f1} ft ${i1} in</b> and its body is <b>${f2} ft ${i2} in</b>.<br>What is the total length?</div>`,
+          correct:`${rf} ft ${ri} in`,
+          wrongs:[`${rf} ft ${ri+1} in`,`${rf-1} ft ${ri+12} in`,`${rf+1} ft ${ri} in`].filter(x=>x!==`${rf} ft ${ri} in`),
+          concept:'Adding Inches and Feet'
+        });
+      }
+      // Weight: pounds to ounces (2)
+      for(let i=0;i<2;i++){
+        const lbs=randInt(2,8);
+        const oz=lbs*16;
+        qs.push({
+          html:`<div class="q-label">Pokémon Weight!</div><div class="q-text">${poke()} weighs <b>${lbs} pounds</b>.<br>How many ounces is that?<br><span style="font-size:0.85rem;color:#aaa;">(1 pound = 16 ounces)</span></div>`,
+          correct:`${oz} ounces`, wrongs:nearbyWrongs(oz,3,16).map(x=>`${x} ounces`), concept:'Weight Measurements'
+        });
+      }
+      // Liquid conversions (2)
+      for(let i=0;i<2;i++){
+        const types=shuffle([
+          {q:`How many cups are in <b>${randInt(2,4)} pints</b>?`,mult:2,unit:'cups',base:randInt(2,4)},
+          {q:`How many pints are in <b>${randInt(2,4)} quarts</b>?`,mult:2,unit:'pints',base:randInt(2,4)},
+          {q:`How many quarts are in <b>${randInt(2,3)} gallons</b>?`,mult:4,unit:'quarts',base:randInt(2,3)}
+        ]);
+        const t=types[i];
+        const ans=t.base*t.mult;
+        qs.push({
+          html:`<div class="q-label">Conversion Lab!</div><div class="q-text">${t.q}<br><span style="font-size:0.85rem;color:#aaa;">(1 pint = 2 cups, 1 quart = 2 pints, 1 gallon = 4 quarts)</span></div>`,
+          correct:`${ans} ${t.unit}`, wrongs:nearbyWrongs(ans,3,3).map(x=>`${x} ${t.unit}`), concept:'Unit Conversions'
+        });
+      }
+      // Temperature (2)
+      for(let i=0;i<2;i++){
+        const temp=randInt(2,10)*10+randInt(0,1)*5;
+        qs.push({
+          html:`<div class="q-label">Temperature Check!</div><div class="q-text">What temperature does the thermometer show?</div><div class="q-visual">${thermoSVG(temp,0,120)}</div>`,
+          correct:`${temp}°F`, wrongs:nearbyWrongs(temp,3,15).map(x=>`${x}°F`), concept:'Temperature'
+        });
+      }
+      return shuffle(qs);
+    }
+  },
+
+  // ---- 5. RESEARCH GYM (Data & Graphs) ----
+  {
+    id:'research', name:'Research Lab', leader:'Alakazam', sprite:SB+'65.png',
+    color:'#F85888', badge:'📊', badgeName:'Data Badge',
+    desc:'Help Professor Oak analyze Pokémon data! Read tables, graphs, and Venn diagrams.',
+    concepts:'Tables & Charts • Bar Graphs • Line Graphs • Venn Diagrams',
+    generate(){
+      const qs=[];
+      // Table questions (3)
+      for(let i=0;i<3;i++){
+        const trainers=shuffle(TRAINERS).slice(0,4);
+        const counts=trainers.map(t=>({n:t,v:randInt(2,15)}));
+        let tableHTML=`<table style="border-collapse:collapse;margin:8px auto;background:white;border-radius:6px;overflow:hidden;">
+          <tr style="background:#F8D030;color:#333;"><th style="padding:6px 14px;border:1px solid #ddd;">Trainer</th><th style="padding:6px 14px;border:1px solid #ddd;">Pokémon Caught</th></tr>`;
+        counts.forEach(c=>{tableHTML+=`<tr><td style="padding:5px 14px;border:1px solid #ddd;color:#333;">${c.n}</td><td style="padding:5px 14px;border:1px solid #ddd;text-align:center;color:#333;">${c.v}</td></tr>`;});
+        tableHTML+=`</table>`;
+        const qTypes=shuffle([
+          {q:`How many Pokémon did <b>${counts[0].n}</b> catch?`, a:counts[0].v},
+          {q:`Who caught the <b>most</b> Pokémon?`, a:counts.reduce((a,b)=>a.v>b.v?a:b).n, isName:true},
+          {q:`How many Pokémon did <b>${counts[0].n}</b> and <b>${counts[1].n}</b> catch <b>together</b>?`, a:counts[0].v+counts[1].v}
+        ]);
+        const qt=qTypes[0];
+        const correct=String(qt.a);
+        let wrongs;
+        if(qt.isName) wrongs=counts.filter(c=>c.n!==qt.a).map(c=>c.n);
+        else wrongs=nearbyWrongs(Number(qt.a),3,4).map(String);
+        qs.push({
+          html:`<div class="q-label">Research Table</div><div class="q-visual">${tableHTML}</div><div class="q-text">${qt.q}</div>`,
+          correct, wrongs, concept:'Reading Tables'
+        });
+      }
+      // Bar graph (3)
+      for(let i=0;i<3;i++){
+        const pokes=shuffle(POKEMON_NAMES).slice(0,5);
+        const data=pokes.map(p=>({l:p.slice(0,6),v:randInt(2,12),full:p}));
+        const graph=barGraphSVG(data);
+        const qTypes=shuffle([
+          {q:`How many <b>${data[0].full}</b> were spotted?`, a:data[0].v},
+          {q:`Which Pokémon was spotted the <b>most</b>?`, a:data.reduce((a,b)=>a.v>b.v?a:b).l, isName:true},
+          {q:`How many <b>more</b> ${data[1].full} than ${data[2].full}?`, a:Math.abs(data[1].v-data[2].v)}
+        ]);
+        const qt=qTypes[0];
+        const correct=String(qt.a);
+        let wrongs;
+        if(qt.isName) wrongs=data.filter(d=>d.l!==qt.a).map(d=>d.l).slice(0,3);
+        else wrongs=nearbyWrongs(Number(qt.a),3,3).map(String);
+        qs.push({
+          html:`<div class="q-label">Bar Graph</div><div class="q-visual">${graph}</div><div class="q-text">${qt.q}</div>`,
+          correct, wrongs, concept:'Reading Bar Graphs'
+        });
+      }
+      // Line graph (2)
+      for(let i=0;i<2;i++){
+        const data=DAYS.map(d=>({l:d,v:randInt(1,10)}));
+        const graph=lineGraphSVG(data);
+        const dayIdx=randInt(0,4);
+        qs.push({
+          html:`<div class="q-label">Line Graph</div><div class="q-visual">${graph}</div><div class="q-text">How many Pokémon were caught on <b>${DAYS[dayIdx]}${['Monday','Tuesday','Wednesday','Thursday','Friday'][dayIdx].slice(3)}</b>?</div>`,
+          correct:String(data[dayIdx].v), wrongs:nearbyWrongs(data[dayIdx].v,3,3).map(String), concept:'Reading Line Graphs'
+        });
+      }
+      // Venn diagram (2)
+      const vennData=shuffle([
+        {tA:"Fire Type",tB:"Can Fly",oA:["Vulpix","Growlithe"],both:["Charizard"],oB:["Pidgey","Butterfree"]},
+        {tA:"Water Type",tB:"Blue Color",oA:["Psyduck","Goldeen"],both:["Squirtle","Vaporeon"],oB:["Zubat"]},
+        {tA:"Has Tail",tB:"Has Wings",oA:["Pikachu","Meowth"],both:["Charizard","Dragonite"],oB:["Butterfree","Pidgey"]},
+        {tA:"Normal Type",tB:"Can Sing",oA:["Rattata","Meowth"],both:["Jigglypuff"],oB:["Lapras","Primarina"]}
+      ]);
+      for(let i=0;i<2;i++){
+        const vd=vennData[i];
+        const svg=vennSVG(vd);
+        const qTypes=shuffle([
+          {q:`How many Pokémon are in <b>BOTH</b> circles?`, a:vd.both.length},
+          {q:`How many Pokémon are <b>only</b> in "${vd.tA}"?`, a:vd.oA.length},
+          {q:`How many Pokémon are shown <b>in total</b>?`, a:vd.oA.length+vd.both.length+vd.oB.length}
+        ]);
+        const qt=qTypes[0];
+        qs.push({
+          html:`<div class="q-label">Venn Diagram</div><div class="q-visual">${svg}</div><div class="q-text">${qt.q}</div>`,
+          correct:String(qt.a), wrongs:nearbyWrongs(qt.a,3,2).map(String), concept:'Venn Diagrams'
+        });
+      }
+      return shuffle(qs);
+    }
+  },
+
+  // ---- 6. EVOLUTION GYM (Patterns) ----
+  {
+    id:'evolution', name:'Evolution Gym', leader:'Eevee', sprite:SB+'133.png',
+    color:'#A8A878', badge:'🔢', badgeName:'Pattern Badge',
+    desc:'Crack the code of evolution patterns! Find rules, complete sequences, and explore multiplication.',
+    concepts:'Number Patterns • Commutative Property of Multiplication',
+    generate(){
+      const qs=[];
+      // Additive patterns - find next (3)
+      for(let i=0;i<3;i++){
+        const start=randInt(2,10);
+        const step=pick([2,3,4,5,6,10]);
+        const seq=[];for(let j=0;j<4;j++)seq.push(start+step*j);
+        const ans=start+step*4;
+        qs.push({
+          html:`<div class="q-label">Evolution Pattern!</div><div class="q-text">What comes next?<br><b style="font-size:1.3rem;">${seq.join(', ')}, ?</b></div>`,
+          correct:String(ans), wrongs:nearbyWrongs(ans,3,step).map(String), concept:'Number Patterns'
+        });
+      }
+      // Multiply patterns - find next (2)
+      for(let i=0;i<2;i++){
+        const start=pick([1,2,3]);
+        const mult=pick([2,3]);
+        const seq=[];let v=start;for(let j=0;j<4;j++){seq.push(v);v*=mult;}
+        qs.push({
+          html:`<div class="q-label">Evolution Pattern!</div><div class="q-text">What comes next?<br><b style="font-size:1.3rem;">${seq.join(', ')}, ?</b></div>`,
+          correct:String(v), wrongs:nearbyWrongs(v,3,Math.max(3,Math.floor(v/4))).map(String), concept:'Number Patterns'
+        });
+      }
+      // Find the rule (3)
+      for(let i=0;i<3;i++){
+        const rules=shuffle([
+          {step:3,label:"Add 3"},{step:5,label:"Add 5"},{step:7,label:"Add 7"},
+          {step:10,label:"Add 10"},{step:4,label:"Add 4"},{step:6,label:"Add 6"}
+        ]);
+        const r=rules[i];
+        const start=randInt(1,10);
+        const seq=[];for(let j=0;j<5;j++)seq.push(start+r.step*j);
+        const allLabels=["Add 2","Add 3","Add 4","Add 5","Add 6","Add 7","Add 10","Multiply by 2"];
+        const wrongs=allLabels.filter(x=>x!==r.label).slice(0,3);
+        qs.push({
+          html:`<div class="q-label">Find the Rule!</div><div class="q-text">What is the rule for this pattern?<br><b style="font-size:1.3rem;">${seq.join(', ')}...</b></div>`,
+          correct:r.label, wrongs, concept:'Number Patterns'
+        });
+      }
+      // Commutative property (2)
+      for(let i=0;i<2;i++){
+        const a=randInt(2,9),b=randInt(2,9);
+        const product=a*b;
+        if(i===0){
+          qs.push({
+            html:`<div class="q-label">Commutative Property!</div><div class="q-text">If <b>${a} × ${b} = ${product}</b>,<br>then what is <b>${b} × ${a}</b>?</div>`,
+            correct:String(product), wrongs:nearbyWrongs(product,3,5).map(String), concept:'Commutative Property'
+          });
+        } else {
+          qs.push({
+            html:`<div class="q-label">Commutative Property!</div><div class="q-text">Which shows the <b>Commutative Property</b>?</div>`,
+            correct:`${a} × ${b} = ${b} × ${a}`,
+            wrongs:[`${a} × ${b} = ${a} + ${b}`,`${a} + ${b} = ${b} × ${a}`,`${a} × ${b} = ${a} × ${a}`],
+            concept:'Commutative Property'
+          });
+        }
+      }
+      return shuffle(qs);
+    }
+  },
+
+  // ---- 7. CLOCK TOWER GYM (Time) ----
+  {
+    id:'clocktower', name:'Clock Tower Gym', leader:'Hoothoot', sprite:SB+'163.png',
+    color:'#A890F0', badge:'⏰', badgeName:'Time Badge',
+    desc:'Master the clock! Read analog time, calculate elapsed time, and solve time puzzles.',
+    concepts:'Telling Time • Elapsed Time',
+    generate(){
+      const qs=[];
+      const mins=[0,5,10,15,20,25,30,35,40,45,50,55];
+      const fmt=(h,m)=>`${h}:${m<10?'0':''}${m}`;
+      // Read clock (4)
+      for(let i=0;i<4;i++){
+        const h=randInt(1,12),m=pick(mins);
+        const correct=fmt(h,m);
+        const wrongs=[
+          fmt(h%12+1,m),
+          fmt(h,(m+30)%60),
+          fmt(h===12?1:h+1,(m+5)%60)
+        ];
+        qs.push({
+          html:`<div class="q-label">Read the Clock!</div><div class="q-text">What time does this clock show?</div><div class="q-visual">${clockSVG(h,m)}</div>`,
+          correct, wrongs, concept:'Telling Time'
+        });
+      }
+      // Elapsed time - add minutes (3)
+      for(let i=0;i<3;i++){
+        const h=randInt(1,11),m=pick([0,10,15,20,30]);
+        const add=pick([15,20,25,30,45]);
+        let nh=h,nm=m+add;
+        while(nm>=60){nm-=60;nh++; if(nh>12)nh=1;}
+        qs.push({
+          html:`<div class="q-label">Elapsed Time!</div><div class="q-text">${pick(POKEMON_NAMES)} starts training at <b>${fmt(h,m)}</b>.<br>Training lasts <b>${add} minutes</b>.<br>What time does it end?</div>`,
+          correct:fmt(nh,nm),
+          wrongs:[fmt(nh,nm===0?5:nm-5),fmt(nh%12+1,nm),fmt(nh,(nm+15)%60)],
+          concept:'Elapsed Time'
+        });
+      }
+      // Elapsed time - add hours (3)
+      for(let i=0;i<3;i++){
+        const h=randInt(1,10),m=pick([0,15,30]);
+        const addH=randInt(1,3),addM=pick([0,15,30]);
+        let nh=h+addH,nm=m+addM;
+        while(nm>=60){nm-=60;nh++;}
+        if(nh>12)nh-=12;
+        const timeStr=addM>0?`${addH} hour${addH>1?'s':''} and ${addM} minutes`:`${addH} hour${addH>1?'s':''}`;
+        qs.push({
+          html:`<div class="q-label">Time Travel!</div><div class="q-text">It is <b>${fmt(h,m)}</b> now.<br>What time will it be in <b>${timeStr}</b>?</div>`,
+          correct:fmt(nh,nm),
+          wrongs:[fmt((nh%12)+1,nm),fmt(nh,(nm+30)%60),fmt(nh>1?nh-1:12,nm)],
+          concept:'Elapsed Time'
+        });
+      }
+      return shuffle(qs);
+    }
+  },
+
+  // ---- 8. SYMMETRY GYM ----
+  {
+    id:'symmetry', name:'Symmetry Gym', leader:'Butterfree', sprite:SB+'12.png',
+    color:'#A8B820', badge:'🦋', badgeName:'Mirror Badge',
+    desc:'Discover symmetry in shapes! Find lines of symmetry and identify symmetrical figures.',
+    concepts:'Lines of Symmetry',
+    generate(){
+      const qs=[];
+      const shapeNames=Object.keys(SHAPE_SYM);
+      const pool=shuffle(shapeNames);
+      // How many lines of symmetry? (5)
+      for(let i=0;i<5;i++){
+        const name=pool[i%pool.length];
+        const info=SHAPE_SYM[name];
+        const displayLines=info.num>=10?"More than 4":String(info.num);
+        const possibles=["0","1","2","3","4","5","6","More than 4"];
+        const wrongs=possibles.filter(x=>x!==displayLines).slice(0,3);
+        qs.push({
+          html:`<div class="q-label">Symmetry Scanner!</div><div class="q-text">How many lines of symmetry does this <b>${info.label}</b> have?</div><div class="q-visual">${drawShape(name)}</div>`,
+          correct:displayLines, wrongs:shuffle(wrongs), concept:'Lines of Symmetry'
+        });
+      }
+      // Does it have symmetry? (3)
+      for(let i=0;i<3;i++){
+        const name=pool[(5+i)%pool.length];
+        const info=SHAPE_SYM[name];
+        qs.push({
+          html:`<div class="q-label">Symmetry Check!</div><div class="q-text">Does this <b>${info.label}</b> have <b>at least one</b> line of symmetry?</div><div class="q-visual">${drawShape(name)}</div>`,
+          correct:info.has?"Yes":"No", wrongs:info.has?["No","Only diagonal","Not sure"]:["Yes","Only horizontal","Not sure"],
+          concept:'Lines of Symmetry'
+        });
+      }
+      // Which shape has exactly N lines? (2)
+      for(let i=0;i<2;i++){
+        const targets=shuffle(shapeNames.filter(s=>SHAPE_SYM[s].num>0&&SHAPE_SYM[s].num<10));
+        const correct=targets[0];
+        const info=SHAPE_SYM[correct];
+        const wrongShapes=shapeNames.filter(s=>s!==correct&&SHAPE_SYM[s].num!==info.num).slice(0,3);
+        qs.push({
+          html:`<div class="q-label">Shape Match!</div><div class="q-text">Which shape has exactly <b>${info.num}</b> line${info.num>1?'s':''} of symmetry?</div>`,
+          correct:info.label, wrongs:wrongShapes.map(s=>SHAPE_SYM[s].label), concept:'Lines of Symmetry'
+        });
+      }
+      return shuffle(qs);
+    }
+  }
+];
+
+// ---- ELITE FOUR ----
+const eliteFour = {
+  id:'elite4', name:'The Elite Four', leader:'Dragonite', sprite:SB+'149.png',
+  color:'#7038F8', badge:'👑', badgeName:'Champion Crown',
+  desc:'The ultimate challenge! 20 questions from every gym. Only true champions pass!',
+  concepts:'All Concepts',
+  generate(){
+    // Pull 2-3 questions from each gym
+    let all=[];
+    gyms.forEach(g=>{
+      const gqs=g.generate();
+      all.push(...gqs.slice(0,randInt(2,3)));
+    });
+    return shuffle(all).slice(0,20);
+  }
+};
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let state = {
+  trainerName:'',
+  currentGym:null,
+  questions:[],
+  currentQ:0,
+  score:0,
+  streak:0,
+  bestStreak:0,
+  correct:0,
+  total:0,
+  answered:false
+};
+
+let progress = JSON.parse(localStorage.getItem('mathleague_progress') || '{"badges":[],"scores":{}}');
+function saveProgress(){ localStorage.setItem('mathleague_progress', JSON.stringify(progress)); }
+
+// ============================================================
+// AUDIO
+// ============================================================
+let audioOn=true;
+const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+function toggleAudio(){ audioOn=!audioOn; document.getElementById('audioBtn').textContent=audioOn?'🔊':'🔇'; }
+function playTone(freq,dur,type='square'){
+  if(!audioOn)return;
+  try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=type;o.frequency.value=freq;g.gain.value=0.08;
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
+  o.stop(audioCtx.currentTime+dur);}catch(e){}
+}
+function playCorrect(){playTone(523,0.1);setTimeout(()=>playTone(659,0.1),100);setTimeout(()=>playTone(784,0.15),200);}
+function playWrong(){playTone(330,0.15,'sawtooth');setTimeout(()=>playTone(277,0.2,'sawtooth'),120);}
+function playVictory(){[523,587,659,784,880].forEach((f,i)=>setTimeout(()=>playTone(f,0.15),i*120));}
+
+// ============================================================
+// SCREEN MANAGEMENT
+// ============================================================
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ============================================================
+// MAP SCREEN
+// ============================================================
+function goToMap(){
+  const name=document.getElementById('trainerName').value.trim();
+  if(!name){document.getElementById('trainerName').focus();return;}
+  state.trainerName=name;
+  renderMap();
+  showScreen('map-screen');
+}
+document.getElementById('trainerName').addEventListener('keydown',e=>{if(e.key==='Enter')goToMap();});
+
+function renderMap(){
+  document.getElementById('mapGreeting').textContent=`${state.trainerName}'s Gym Map`;
+  // Badge bar
+  const badgeBar=document.getElementById('badgeBar');
+  badgeBar.innerHTML=gyms.map(g=>{
+    const earned=progress.badges.includes(g.id);
+    return `<div class="badge-slot ${earned?'earned':''}" title="${g.badgeName}">${earned?g.badge:'⚫'}</div>`;
+  }).join('');
+  // Gym grid
+  const allBadges=progress.badges.length>=8;
+  const grid=document.getElementById('gymGrid');
+  let html=gyms.map(g=>{
+    const earned=progress.badges.includes(g.id);
+    const best=progress.scores[g.id];
+    return `<div class="gym-card ${earned?'completed':''}" onclick="selectGym('${g.id}')" style="border-color:${earned?g.color:'#333'}">
+      ${earned?`<div class="gym-badge-icon">${g.badge}</div>`:''}
+      <img src="${g.sprite}" alt="${g.leader}">
+      <div class="gym-name" style="color:${g.color}">${g.name}</div>
+      <div class="gym-tag">${g.leader}</div>
+      ${best?`<div class="gym-best">Best: ${best}/10</div>`:''}
+    </div>`;
+  }).join('');
+  // Elite Four
+  html+=`<div class="gym-card ${allBadges?'':'locked'}" onclick="${allBadges?"selectGym('elite4')":"void(0)"}" style="border-color:${allBadges?eliteFour.color:'#333'}">
+    ${progress.badges.includes('elite4')?`<div class="gym-badge-icon">👑</div>`:''}
+    <img src="${eliteFour.sprite}" alt="Dragonite">
+    <div class="gym-name" style="color:${allBadges?eliteFour.color:'#555'}">Elite Four</div>
+    <div class="gym-tag">${allBadges?'UNLOCKED':'Need all 8 badges'}</div>
+    ${progress.scores.elite4?`<div class="gym-best">Best: ${progress.scores.elite4}/20</div>`:''}
+  </div>`;
+  grid.innerHTML=html;
+}
+
+// ============================================================
+// GYM INTRO & START
+// ============================================================
+function selectGym(id){
+  const gym = id==='elite4' ? eliteFour : gyms.find(g=>g.id===id);
+  if(!gym)return;
+  state.currentGym=gym;
+  document.getElementById('introSprite').src=gym.sprite;
+  document.getElementById('introTitle').innerHTML=`<span style="color:${gym.color}">${gym.name}</span>`;
+  document.getElementById('introDesc').textContent=gym.desc;
+  document.getElementById('introConcepts').innerHTML=`<b>Skills:</b> ${gym.concepts}`;
+  showScreen('intro-screen');
+}
+
+function startGym(){
+  const gym=state.currentGym;
+  state.questions=gym.generate();
+  state.currentQ=0;
+  state.score=0;
+  state.streak=0;
+  state.bestStreak=0;
+  state.correct=0;
+  state.total=state.questions.length;
+  state.answered=false;
+  document.getElementById('gameTrainer').textContent=state.trainerName;
+  document.getElementById('scoreDisplay').textContent='0';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('streakDisplay').textContent='';
+  showScreen('game-screen');
+  renderQuestion();
+}
+
+// ============================================================
+// RENDER QUESTION
+// ============================================================
+function renderQuestion(){
+  if(state.currentQ>=state.questions.length){endGym();return;}
+  state.answered=false;
+  const q=state.questions[state.currentQ];
+  // Progress
+  const pct=((state.currentQ)/state.total)*100;
+  document.getElementById('progressFill').style.width=pct+'%';
+  // Question
+  document.getElementById('questionArea').innerHTML=q.html;
+  // Answers
+  const choices=q.choices||makeChoices(q.correct,q.wrongs);
+  document.getElementById('answerGrid').innerHTML=choices.map((c,i)=>
+    `<button class="answer-btn" onclick="checkAnswer(this,'${escapeStr(c)}')">${c}</button>`
+  ).join('');
+  document.getElementById('feedback').textContent='';
+  document.getElementById('streakDisplay').textContent=state.streak>1?`🔥 Streak: ${state.streak}`:'';
+}
+
+function escapeStr(s){return s.replace(/'/g,"\\'");}
+
+// ============================================================
+// CHECK ANSWER
+// ============================================================
+function checkAnswer(btn,selected){
+  if(state.answered)return;
+  state.answered=true;
+  const q=state.questions[state.currentQ];
+  const correct=q.correct;
+  const buttons=document.querySelectorAll('#answerGrid .answer-btn');
+  buttons.forEach(b=>{
+    b.style.pointerEvents='none';
+    if(b.textContent===correct)b.classList.add('correct');
+  });
+  const fb=document.getElementById('feedback');
+  if(selected===correct){
+    btn.classList.add('correct');
+    const xp=10+state.streak*5;
+    state.score+=xp;
+    state.streak++;
+    state.correct++;
+    if(state.streak>state.bestStreak)state.bestStreak=state.streak;
+    fb.innerHTML=`<span style="color:var(--green)">✨ Super effective! +${xp} XP</span>`;
+    playCorrect();
+    // XP popup
+    const popup=document.createElement('div');
+    popup.className='xp-popup';
+    popup.textContent=`+${xp} XP`;
+    const rect=btn.getBoundingClientRect();
+    popup.style.left=rect.left+rect.width/2-30+'px';
+    popup.style.top=rect.top-10+'px';
+    document.body.appendChild(popup);
+    setTimeout(()=>popup.remove(),900);
+  } else {
+    btn.classList.add('wrong');
+    state.streak=0;
+    fb.innerHTML=`<span style="color:var(--red)">Not very effective... It was <b>${correct}</b></span>`;
+    playWrong();
+  }
+  document.getElementById('scoreDisplay').textContent=state.score;
+  document.getElementById('streakDisplay').textContent=state.streak>1?`🔥 Streak: ${state.streak}`:'';
+  setTimeout(()=>{
+    state.currentQ++;
+    renderQuestion();
+  },1500);
+}
+
+// ============================================================
+// END GYM / RESULTS
+// ============================================================
+function endGym(){
+  const gym=state.currentGym;
+  const pct=Math.round((state.correct/state.total)*100);
+  const passed=pct>=70;
+  document.getElementById('progressFill').style.width='100%';
+  // Update progress
+  if(passed && !progress.badges.includes(gym.id)){
+    progress.badges.push(gym.id);
+  }
+  const prev=progress.scores[gym.id]||0;
+  if(state.correct>prev) progress.scores[gym.id]=state.correct;
+  saveProgress();
+  // Results screen
+  document.getElementById('resultsSprite').src=gym.sprite;
+  if(passed){
+    document.getElementById('resultsTitle').innerHTML=`<span style="color:var(--green)">Gym Cleared!</span>`;
+    document.getElementById('resultsBadge').textContent=gym.badge;
+    document.getElementById('resultsMsg').textContent=
+      pct>=90?`Amazing, ${state.trainerName}! You're a true Pokémon Math Master!`:
+      `Great job, ${state.trainerName}! You earned the ${gym.badgeName}!`;
+    playVictory();
+  } else {
+    document.getElementById('resultsTitle').innerHTML=`<span style="color:var(--yellow)">Keep Training!</span>`;
+    document.getElementById('resultsBadge').textContent='💪';
+    document.getElementById('resultsMsg').textContent=`You need 70% to earn the badge. Keep practicing, ${state.trainerName}!`;
+  }
+  document.getElementById('resultsScore').innerHTML=`Score: <b>${state.score}</b> XP &nbsp;|&nbsp; ${state.correct}/${state.total} correct (${pct}%)`;
+  document.getElementById('resultsStats').innerHTML=`Best Streak: ${state.bestStreak} 🔥`;
+}
+
+// ============================================================
+// KEYBOARD SUPPORT
+// ============================================================
+document.addEventListener('keydown', e=>{
+  if(document.getElementById('game-screen').classList.contains('active')&&!state.answered){
+    const num=parseInt(e.key);
+    if(num>=1&&num<=4){
+      const btns=document.querySelectorAll('#answerGrid .answer-btn');
+      if(btns[num-1])btns[num-1].click();
+    }
+  }
+  if(e.key==='Enter'){
+    if(document.getElementById('title-screen').classList.contains('active'))goToMap();
+  }
+});
+</script>
+</body>
+</html>
