@@ -1041,6 +1041,35 @@ const grammarCards = [
 ];
 
 // ========================
+// RANDOMIZE POKEMON ASSIGNMENTS
+// ========================
+// Shuffle which Pokemon appears on which grammar card so kids
+// can't memorize Pokemon → answer mappings.
+function randomizePokemon() {
+  // Extract all Pokemon identities
+  const pokemonPool = grammarCards.map(c => ({
+    pokemon: c.pokemon,
+    sprite: c.sprite,
+    pokemonName: c.pokemonName,
+    color: c.color,
+    type: c.type
+  }));
+  // Fisher-Yates shuffle
+  for (let i = pokemonPool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pokemonPool[i], pokemonPool[j]] = [pokemonPool[j], pokemonPool[i]];
+  }
+  // Reassign shuffled Pokemon to cards
+  grammarCards.forEach((card, i) => {
+    card.pokemon = pokemonPool[i].pokemon;
+    card.sprite = pokemonPool[i].sprite;
+    card.pokemonName = pokemonPool[i].pokemonName;
+    card.color = pokemonPool[i].color;
+    card.type = pokemonPool[i].type;
+  });
+}
+
+// ========================
 // POKEMON IMAGE HELPERS
 // ========================
 function pokemonImg(card, size = 96) {
@@ -1208,6 +1237,9 @@ function startGame(mode) {
   bestStreak = 0;
   correctCount = 0;
   totalAnswered = 0;
+
+  // Shuffle which Pokemon appears on which grammar type
+  randomizePokemon();
 
   shuffledCards = [...grammarCards].sort(() => Math.random() - 0.5);
 
